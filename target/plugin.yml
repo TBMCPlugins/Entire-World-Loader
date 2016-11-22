@@ -1,0 +1,6 @@
+ main: iieLoadSaveEntireWorld.Main
+ version: 1.0.0
+ name: LoadSaveEntireWorld
+ commands:
+   loadsaveentireworld:
+     description: loads and saves the entire map, in 32x32 chunk sections
