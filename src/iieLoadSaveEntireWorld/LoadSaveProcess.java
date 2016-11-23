@@ -17,23 +17,62 @@ public class LoadSaveProcess implements Runnable {
 	private static int[] currentRegion;
 	private static int totalRegions;
 
-	private static int untilNextProgSave;
+	private static int untilSaveProg;
 	
-			
-	LoadSaveProcess(int width, int[] center, int[] lowerleft, String worldName)
+	//===============================CONTROLS===============================
+	static void start(int width, int[] center, int[] lowerleft, String name)
 	{
-		world = Bukkit.getWorld(worldName);
-		LoadSaveProcess.worldName = worldName;
-		currentRegion = center;
-		totalRegions = width*width;
-		untilNextProgSave = 10;
 		Map.init(width, lowerleft);
+		world 			= Bukkit.getWorld(worldName);
+		worldName 		= name;
+		currentRegion 	= center;
+		totalRegions	= width*width;
+		untilSaveProg	= 9;
+	}
+	public static void resume(String name)
+	{
+		String path = "unfinishedWorlds." + name + ".";
 		
-		int length = worldName.length();
-		if (length > Cache.maxNameLength)
-			Main.config.set("max namelength",length);
-		Main.config.set("unfinished worlds." + worldName + ".width", width);
-		Cache.set();
+		int width = Main.config.getInt(path + "width");
+		int[] center = new int[]
+				{
+						Main.config.getInt(path + "center.x"),
+						Main.config.getInt(path + "center.z")
+				};
+		int[] lowerleft = new int[]
+				{
+						Main.config.getInt(path + "lowerleft.x"),
+						Main.config.getInt(path + "lowerleft.z")
+				};
+		currentRegion = new int[]
+				{
+						Main.config.getInt(path + "currentRegion.x"),
+						Main.config.getInt(path + "currentRegion.z")
+				};
+		totalRegions = Main.config.getInt(path + "width");
+		Map.init(w, lowerleft);
+		
+		SavePattern.n = Main.config.getInt(path + "n");
+		SavePattern.D = Main.config.getInt(path + "D");
+		SavePattern.d = Main.config.getInt(path + "d");
+		SavePattern.B = Main.config.getBoolean(path + "B");
+	}
+	public static void saveProgress()
+	{
+		String path = "unfinishedWorlds." + worldName + ".";
+		Main.config.set(path + "currentRegion.x", currentRegion[0]);
+		Main.config.set(path + "currentRegion.z", currentRegion[1]);
+		Main.config.set(path + "n", SavePattern.n);
+		Main.config.set(path + "D", SavePattern.D);
+		Main.config.set(path + "d", SavePattern.d);
+		Main.config.set(path + "B", SavePattern.B);
+		Main.plugin.saveConfig();
+	}
+	public static void stop()
+	{
+		saveProgress();
+		SavePattern.reset();
+		
 	}
 
 	
@@ -154,40 +193,28 @@ public class LoadSaveProcess implements Runnable {
 	{
 		if (taskRunning) return;
 		else taskRunning = true;
+		
 		int[][][] r = Map.getChunksCurrentRegion();
 		for (int[][] xRow : r)
-			for (int[] chunk : xRow){
+		{
+			for (int[] chunk : xRow)
+			{
 				world.loadChunk(chunk[0], chunk[1], true);
 				world.unloadChunk(chunk[0], chunk[1]);
 			}
-		SavePattern.setNextRegion();
-	}
-	//===============================CONTROLS===============================
-	public static void saveProgress()
-	{
-		String path = "unfinishedWorlds." + worldName + ".";
-		Main.config.set(path + "current region.x", currentRegion[0]);
-		Main.config.set(path + "current region.z", currentRegion[1]);
-		Main.config.set(path + "n", SavePattern.n);
-		Main.config.set(path + "D", SavePattern.D);
-		Main.config.set(path + "d", SavePattern.d);
-		Main.config.set(path + "B", SavePattern.B);
-		Main.plugin.saveConfig();
-	}
-	public void stop()
-	{
-		saveProgress();
-		SavePattern.reset();
-		try {
-			wait(30000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
-	}
-	
-	public static void resume(String worldName)
-	{
-		String path = "unfinishedWorlds." + worldName + ".";
+		SavePattern.setNextRegion();
+		if (SavePattern.complete())
+		{
+			
+		}
+		if (untilSaveProg == 0)
+		{
+			untilSaveProg = 9;
+			saveProgress();
+		}else 
+			untilSaveProg--;
 		
 	}
+	
 }

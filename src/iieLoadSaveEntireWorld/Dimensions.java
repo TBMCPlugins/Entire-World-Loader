@@ -33,9 +33,11 @@ public class Dimensions {
 						);
 		width = regionBounds[2] - regionBounds[0];
 		center = regionCenter(regionBounds);
-		lowerleft[0] = regionBounds[0];
-			lowerleft[1] = regionBounds[2];
-		
+		lowerleft = new int[]
+				{
+						regionBounds[0],
+						regionBounds[2]
+				};		
 	}
 	
 	private static boolean isInt(String arg)
@@ -65,8 +67,8 @@ public class Dimensions {
 	}
 	private static int[] blockCenter(String arg1, String arg2)
 	{
-		int xBlock = isInt(arg1) ? Integer.parseInt(arg1) : 0;
-		int zBlock = isInt(arg2) ? Integer.parseInt(arg2) : 0;
+		int xBlock = isInt(arg1) ? Integer.parseInt(arg1) : defaultDimensions[0][1];
+		int zBlock = isInt(arg2) ? Integer.parseInt(arg2) : defaultDimensions[0][2];
 		return new int[] {xBlock,zBlock};
 	}
 	private static int[] blockBounds(int[] center, int blockRadius)

@@ -9,7 +9,8 @@ public class Main extends JavaPlugin {
 	static Main plugin;
 	static FileConfiguration config;
 	static StartCommand start;
-	static LoadSaveProcess process;
+	static StopCommand stop;
+	
 	static BukkitTask task;
 	
 	public void onEnable() 
@@ -17,10 +18,11 @@ public class Main extends JavaPlugin {
 		plugin = this;
 		config = plugin.getConfig();
 		start = new StartCommand(plugin);
+		stop = new StopCommand(plugin);
 		
 		saveDefaultConfig();
 		getCommand("beginloadsave").setExecutor(start);
-		getCommand("stoploadsave").setExecutor(new StopCommand(plugin));
-		Cache.set();
+		getCommand("stoploadsave").setExecutor(stop);
+		Cache.updateListUnfinished();
 	}
 }

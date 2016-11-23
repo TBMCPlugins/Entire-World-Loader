@@ -22,6 +22,8 @@ public class StartCommand implements CommandExecutor {
 			return false;
 		}
 		else LoadSaveProcess.inProgress = true;
+		
+		
 		if ((Cache.isUnfinished(worldName)))
 		{
 			sender.sendMessage("resuming...");
@@ -30,8 +32,10 @@ public class StartCommand implements CommandExecutor {
 		else
 		{
 			Dimensions d = new Dimensions(args);
-			Main.process = new LoadSaveProcess( d.width, d.center, d.lowerleft, worldName );
+			LoadSaveProcess.start( d.width, d.center, d.lowerleft, worldName );
 		}
+		
+		
 		Main.task = Bukkit.getScheduler().runTaskTimer( plugin, Main.process, 0, 100 );
 		return true;
 	}

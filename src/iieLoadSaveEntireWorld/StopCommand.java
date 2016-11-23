@@ -11,8 +11,13 @@ public class StopCommand implements CommandExecutor{
 		plugin = Plugin;
 	}
 	@Override
-	public boolean onCommand(CommandSender sender, Command label, String command, String[] args) {
-		if (LoadSaveProcess.inProgress) Main.process.stop();
-		return false;
+	public synchronized boolean onCommand(CommandSender sender, Command label, String command, String[] args) {
+		if (LoadSaveProcess.inProgress)
+		{ 
+			LoadSaveProcess.stop(); 
+			return true; 
+		}
+		else 
+			return false;
 	}
 }
