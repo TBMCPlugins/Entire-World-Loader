@@ -1,26 +1,39 @@
 package iieLoadSaveEntireWorld;
 
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 public class LoadSaveProcess implements Runnable {
 	
 	
 	//=============================STATIC FIELDS============================
-	
+		
 	static boolean inProgress = false;
+	static boolean taskRunning = false;
 	
-	private static int[] startRegion;
-	
+	private static World world;
+	private static String worldName;
+		
 	private static int[] currentRegion;
+	private static int totalRegions;
 
-	private static TranslatedCoordinates map;
+	private static int untilNextProgSave;
 	
-	private static int[][][][][] allChunkCoords;	
-	
-	public LoadSaveProcess(int width, int[] center, int[] lowCorner){
-		currentRegion = startRegion = new int[] {center[0],center[1]};
-		map = new TranslatedCoordinates(width,lowCorner[0],lowCorner[1]);
-		generateAllChunkCoords(width,lowCorner[0],lowCorner[1]);
+			
+	LoadSaveProcess(int width, int[] center, int[] lowerleft, String worldName)
+	{
+		world = Bukkit.getWorld(worldName);
+		LoadSaveProcess.worldName = worldName;
+		currentRegion = center;
+		totalRegions = width*width;
+		untilNextProgSave = 10;
+		Map.init(width, lowerleft);
+		
+		int length = worldName.length();
+		if (length > Cache.maxNameLength)
+			Main.config.set("max namelength",length);
+		Main.config.set("unfinished worlds." + worldName + ".width", width);
+		Cache.set();
 	}
 
 	
@@ -46,26 +59,17 @@ public class LoadSaveProcess implements Runnable {
 		 * 	etc.
 		 */
 		
-		private static int n = 1;				//number
-		private static int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
-		private static int D = 1;				//distance to travel
-		private static int d = 0;				//distance already traveled
-		private static boolean B = false;		//OK to change direction?
+		static int n = 1;				//number
+		static int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
+		static int D = 1;				//distance to travel
+		static int d = 0;				//distance already traveled
+		static boolean B = false;		//OK to change direction?
 		static void reset() 
 		{
 			c = 1;
 			D = 1;
 			d = 0;
 			B = false;
-		}
-		static class Loc{//used when pausing the process
-			int c; int D; int d; boolean B;
-			Loc(){
-				this.c = SavePattern.c;
-				this.D = SavePattern.D;
-				this.d = SavePattern.d;
-				this.B = SavePattern.B;
-			}
 		}
 		static void setNextRegion() 
 		{
@@ -85,74 +89,105 @@ public class LoadSaveProcess implements Runnable {
 				}
 				B = !B;
 			}
-		}	
+		}
+		static boolean complete(){
+			return n == totalRegions;
+		}
 	}
 	
 	
+	//===============================CHUNK MAP==============================
 	
-	//=================================UTIL=================================
-	
-	//TRACKER, COORDINATE TRANSLATOR
-	private static class TranslatedCoordinates {
-		
-		int xAdjust;
-		int zAdjust;
-		//boolean[][] savemap;
-		public TranslatedCoordinates(int w, int lowX, int lowZ)
+	private static class Map 
+	{
+		private static int[] 		 lowerleft;
+		private static int[][][][][] allChunkCoords;
+		static void init(int w,int[] lowerleft)
 		{
-			xAdjust = 0 - lowX;
-			zAdjust = 0 - lowZ;
-			//savemap = new boolean[w][w];
-		}
-		int x(int x){  return x + xAdjust;  }
-		int z(int z){  return z + zAdjust;  }
-		/*
-		void save(int x, int z)			{  savemap[x(x)][z(z)] = true;  }
-		boolean isSaved(int x, int z)	{  return savemap[x(x)][z(z)];  }
-		
-		boolean allSaved(){
-			for (boolean[] xRow : savemap){
-				for (boolean region : xRow){
-					if (!region) return false;
-				}
-			}
-			return true;
-		}
-		*/
-	}
-	
-	//GENERATE ALL CHUNK COORDINATES
-	private static void generateAllChunkCoords(int width, int lowX, int lowZ) {
-		allChunkCoords = new int[width][width][32][32][2];
-		int regionX = lowX;
-		boolean negX = true;
-		for (int[][][][] xRowRegions : allChunkCoords){
-			int regionZ = lowZ;
+			Map.lowerleft = lowerleft;
+			allChunkCoords = new int[w][w][32][32][2];
+
+			int regionX = lowerleft[0];
+			int regionZ = lowerleft[1];
+			boolean negX = true;
 			boolean negZ = true;
-			for (int[][][] region : xRowRegions){
-				int chunkX = 0;
-				for (int[][] xRowChunks : region){
-					int chunkZ = 0;
-					for (int[] chunk : xRowChunks){
-						chunk[0] = (regionX * 32) + (negX ? 0 - chunkX : chunkX);
-						chunk[1] = (regionZ * 32) + (negZ ? 0 - chunkZ : chunkZ);
-						chunkZ++;
+			int chunkX = 0;
+			int chunkZ = 0;
+			for (int[][][][] xRowRegions : allChunkCoords)
+			{
+				regionZ = lowerleft[1];
+				negZ = true;
+				for (int[][][] region : xRowRegions)
+				{
+					chunkX = 0;
+					for (int[][] xRowChunks : region)
+					{
+						chunkZ = 0;
+						for (int[] chunk : xRowChunks)
+						{
+							chunk[0] = (regionX * 32) + (negX ? 0 - chunkX : chunkX);
+							chunk[1] = (regionZ * 32) + (negZ ? 0 - chunkZ : chunkZ);	
+							chunkZ++;
+						}
+						chunkX++;
 					}
-					chunkX++;
+					regionZ++;
+					if (negZ)
+						negZ = regionZ < 0;
 				}
-				regionZ++;
-				if (negZ)
-					negZ = regionZ < 0;
+				regionX++;
+				if (negX) 
+					negX = regionX < 0;
 			}
-			regionX++;
-			if (negX) 
-				negX = regionX < 0;
 		}
-	}
+		static int[][][] getChunksCurrentRegion(){
+			return 
+					allChunkCoords
+					[  currentRegion[0] - lowerleft[0]  ]
+					[  currentRegion[1] - lowerleft[1]  ];
+		}
+	}	
 	
 	
 	//==================================RUN=================================
-	public void run() {
+	public void run() 
+	{
+		if (taskRunning) return;
+		else taskRunning = true;
+		int[][][] r = Map.getChunksCurrentRegion();
+		for (int[][] xRow : r)
+			for (int[] chunk : xRow){
+				world.loadChunk(chunk[0], chunk[1], true);
+				world.unloadChunk(chunk[0], chunk[1]);
+			}
+		SavePattern.setNextRegion();
+	}
+	//===============================CONTROLS===============================
+	public static void saveProgress()
+	{
+		String path = "unfinishedWorlds." + worldName + ".";
+		Main.config.set(path + "current region.x", currentRegion[0]);
+		Main.config.set(path + "current region.z", currentRegion[1]);
+		Main.config.set(path + "n", SavePattern.n);
+		Main.config.set(path + "D", SavePattern.D);
+		Main.config.set(path + "d", SavePattern.d);
+		Main.config.set(path + "B", SavePattern.B);
+		Main.plugin.saveConfig();
+	}
+	public void stop()
+	{
+		saveProgress();
+		SavePattern.reset();
+		try {
+			wait(30000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void resume(String worldName)
+	{
+		String path = "unfinishedWorlds." + worldName + ".";
 		
 	}
 }

@@ -19,7 +19,7 @@ public class UnusedPattern {
 	
 	static int[] currentRegion;
 
-	static RegionMap savedRegions;
+	static TranslatedCoordinates savedRegions;
 	
 	static int[][][][][] allChunkCoords;	
 		
@@ -35,7 +35,7 @@ public class UnusedPattern {
 		
 		startRegion = new int[] {x,z};
 		currentRegion = startRegion;
-		savedRegions = new RegionMap(width,lowX,lowZ);
+		savedRegions = new TranslatedCoordinates(width,lowX,lowZ);
 		generateAllChunkCoords(width,lowX,lowZ);			
 		if (even)	regionPattern = new OutwardSpiralPattern();
 		else		regionPattern = new CardinalPointsPattern();
@@ -178,30 +178,25 @@ public class UnusedPattern {
 	//=================================UTIL=================================
 	
 	//CUSTOM MAP CLASS FOR TRACKING SAVED REGIONS
-	static class RegionMap {
+	static class TranslatedCoordinates {
 		
 		int xAdjust;
 		int zAdjust;
-		boolean[][] map;
-		
-		public RegionMap(int d, int lowX, int lowZ){
+		boolean[][] savemap;
+		public TranslatedCoordinates(int w, int lowX, int lowZ)
+		{
 			xAdjust = 0 - lowX;
 			zAdjust = 0 - lowZ;
-			d++;
-			map = new boolean[d][d];
+			savemap = new boolean[w][w];
 		}
-		void save(int x, int z){
-			x += xAdjust;
-			z += zAdjust;
-			map[x][z] = true;
-		}
-		boolean isSaved(int x, int z){
-			x += xAdjust;
-			z += zAdjust;
-			return map[x][z];
-		}
+		int x(int x){  return x + xAdjust;  }
+		int z(int z){  return z + zAdjust;  }
+		
+		void save(int x, int z)			{  savemap[x(x)][z(z)] = true;  }
+		boolean isSaved(int x, int z)	{  return savemap[x(x)][z(z)];  }
+		
 		boolean allSaved(){
-			for (boolean[] xRow : map){
+			for (boolean[] xRow : savemap){
 				for (boolean region : xRow){
 					if (!region) return false;
 				}
