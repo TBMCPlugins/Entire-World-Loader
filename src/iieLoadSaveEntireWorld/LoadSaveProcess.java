@@ -7,7 +7,7 @@ public class LoadSaveProcess implements Runnable {
 	
 	
 	//=============================STATIC FIELDS============================
-		
+			
 	static boolean inProgress = false;
 	static boolean taskRunning = false;
 	
@@ -29,7 +29,7 @@ public class LoadSaveProcess implements Runnable {
 		totalRegions	= width*width;
 		untilSaveProg	= 9;
 	}
-	public static void resume(String name)
+	static void resume(String name)
 	{
 		String path = "unfinishedWorlds." + name + ".";
 		
@@ -57,7 +57,7 @@ public class LoadSaveProcess implements Runnable {
 		SavePattern.d = Main.config.getInt(path + "d");
 		SavePattern.B = Main.config.getBoolean(path + "B");
 	}
-	public static void saveProgress()
+	static void saveProgress()
 	{
 		String path = "unfinishedWorlds." + worldName + ".";
 		Main.config.set(path + "currentRegion.x", currentRegion[0]);
@@ -68,7 +68,7 @@ public class LoadSaveProcess implements Runnable {
 		Main.config.set(path + "B", SavePattern.B);
 		Main.plugin.saveConfig();
 	}
-	public static void stop()
+	static void stop()
 	{
 		saveProgress();
 		SavePattern.reset();
@@ -78,7 +78,7 @@ public class LoadSaveProcess implements Runnable {
 	
 	//===============================PATTERN================================
 	
-	private static class SavePattern {
+	static final class SavePattern {
 		
 		/*	The pattern:
 		 * 
@@ -137,7 +137,7 @@ public class LoadSaveProcess implements Runnable {
 	
 	//===============================CHUNK MAP==============================
 	
-	private static class Map 
+	private static final class Map 
 	{
 		private static int[] 		 lowerleft;
 		private static int[][][][][] allChunkCoords;

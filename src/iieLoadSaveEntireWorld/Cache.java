@@ -1,22 +1,17 @@
 package iieLoadSaveEntireWorld;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Cache {
 	
 	private static int maxNameLength;
-	private static char[][] worldsUnfinished;
-	static class WorldStatus {
-		
-	}
-	static void updateListUnfinished()
-	{
-		Set<String> unfin = Main.config.getConfigurationSection("unfinished worlds").getKeys(false);
-		
-		maxNameLength = Main.config.getInt("max name length");
-		worldsUnfinished = populate(unfin);
-	}
-	static char[][] populate(Set<String> set)
+	private static char[][] listUnfinished;
+	private static Map<String,WorldStatus> cacheWorldStatus;
+
+	//PRIVATE METHODS===============================
+	private static char[][] populate(Set<String> set)
 	{
 		char[][] worlds = new char[set.size()][maxNameLength];
 		int i = 0;
@@ -33,10 +28,26 @@ public class Cache {
 		}
 		return worlds;
 	}
+	private static void cache()
+	{
+		
+	}
+	
+	//PUBLIC METHODS================================
+	static void generate()
+	{
+		maxNameLength = Main.config.getInt("max name length");
+		listUnfinished = populate(Main.unfinished.getKeys(false));
+		cache();
+	}
+	static void saveProgress()
+	{
+		
+	}
 	static boolean isUnfinished(String name){
 		int i = 0;
 		boolean match = true;
-		for (char[] world : worldsUnfinished)
+		for (char[] world : listUnfinished)
 		{
 			for (char c : name.toCharArray())
 			{
@@ -47,6 +58,22 @@ public class Cache {
 			match = true;
 		}
 		return match;
+	}
+	static void addUnfinished(int width, int[] center, int[] lowerleft, String name)
+	{
+		
+	}
+	
+	static final class WorldStatus {
+		int width;
+		int[] center;
+		int[] lowerleft;
+		int[] currentRegion;
+		
+		int n;
+		int D;
+		int d;
+		boolean B;
 	}
 
 }
