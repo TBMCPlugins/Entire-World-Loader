@@ -24,7 +24,6 @@ public class Main extends JavaPlugin {
 		unfinished = config.getConfigurationSection("unfinished worlds");
 		start = new StartCommand(plugin);
 		stop = new StopCommand(plugin);
-		process = new LoadSaveProcess();
 		
 		saveDefaultConfig();
 		getCommand("beginloadsave").setExecutor(start);

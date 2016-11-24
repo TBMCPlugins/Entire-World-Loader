@@ -7,8 +7,8 @@ import org.bukkit.command.CommandSender;
 public class StopCommand implements CommandExecutor{
 	
 	private static Main plugin;
-	StopCommand(Main Plugin){
-		plugin = Plugin;
+	StopCommand(Main plugin){
+		this.plugin = plugin;
 	}
 	@Override
 	public synchronized boolean onCommand(CommandSender sender, Command label, String command, String[] args) {

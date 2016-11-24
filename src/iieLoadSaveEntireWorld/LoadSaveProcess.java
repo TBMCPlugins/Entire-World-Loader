@@ -2,136 +2,115 @@ package iieLoadSaveEntireWorld;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitTask;
 
 public class LoadSaveProcess implements Runnable {
 	
-	
-	//=============================STATIC FIELDS============================
+	//=================================INIT=================================
+	static boolean processOngoing = false;
+	static LoadSaveProcess process;
+	static BukkitTask bukkitTask;	
 			
-	static boolean inProgress = false;
-	static boolean taskRunning = false;
-	
-	private static World world;
-	private static String worldName;
-		
-	private static int[] currentRegion;
-	private static int totalRegions;
+	boolean ready = true;
+	final Map map;
+	final World world;
+	final String worldname;
+	final int totalRegions;
+	int[] currentRegion;
 
-	private static int untilSaveProg;
+	LoadSaveProcess(
+			String name, int width, int[] center, int[] lowerleft
+			)
+	{
+		map 			= new Map(width, lowerleft);
+		world 			= Bukkit.getWorld(name);
+		worldname 		= name;
+		totalRegions	= width*width;
+		currentRegion 	= center;
+	}
+	LoadSaveProcess(
+			String name, int width, int[] lowerleft, 
+			int[] current, int n, int c, int D, int d, boolean B
+			)
+	{
+		map 			= new Map(width, lowerleft);
+		world 			= Bukkit.getWorld(name);
+		worldname 		= name;
+		totalRegions	= width*width;
+		currentRegion 	= current;
+		this.n = n;
+		this.c = c;
+		this.D = D;
+		this.d = d;
+		this.B = B;
+	}
+	
 	
 	//===============================CONTROLS===============================
-	static void start(int width, int[] center, int[] lowerleft, String name)
+	static void start(String name)
 	{
-		Map.init(width, lowerleft);
-		world 			= Bukkit.getWorld(worldName);
-		worldName 		= name;
-		currentRegion 	= center;
-		totalRegions	= width*width;
-		untilSaveProg	= 9;
-	}
-	static void resume(String name)
-	{
-		String path = "unfinishedWorlds." + name + ".";
 		
-		int width = Main.config.getInt(path + "width");
-		int[] center = new int[]
-				{
-						Main.config.getInt(path + "center.x"),
-						Main.config.getInt(path + "center.z")
-				};
-		int[] lowerleft = new int[]
-				{
-						Main.config.getInt(path + "lowerleft.x"),
-						Main.config.getInt(path + "lowerleft.z")
-				};
-		currentRegion = new int[]
-				{
-						Main.config.getInt(path + "currentRegion.x"),
-						Main.config.getInt(path + "currentRegion.z")
-				};
-		totalRegions = Main.config.getInt(path + "width");
-		Map.init(w, lowerleft);
-		
-		SavePattern.n = Main.config.getInt(path + "n");
-		SavePattern.D = Main.config.getInt(path + "D");
-		SavePattern.d = Main.config.getInt(path + "d");
-		SavePattern.B = Main.config.getBoolean(path + "B");
-	}
-	static void saveProgress()
-	{
-		String path = "unfinishedWorlds." + worldName + ".";
-		Main.config.set(path + "currentRegion.x", currentRegion[0]);
-		Main.config.set(path + "currentRegion.z", currentRegion[1]);
-		Main.config.set(path + "n", SavePattern.n);
-		Main.config.set(path + "D", SavePattern.D);
-		Main.config.set(path + "d", SavePattern.d);
-		Main.config.set(path + "B", SavePattern.B);
-		Main.plugin.saveConfig();
 	}
 	static void stop()
+	{		
+		//TODO
+	}
+	static void finish()
 	{
-		saveProgress();
-		SavePattern.reset();
-		
+		bukkitTask.cancel();
+		process = null;
+		System.gc();
+		processOngoing = false;
 	}
 
 	
 	//===============================PATTERN================================
 	
-	static final class SavePattern {
-		
-		/*	The pattern:
-		 * 
-		 * 		3 | 36  35  34  33  32  31
-		 * 		  |
-		 * 		2 | 17  16  15  14  13  30
-		 * 		  |
-		 * 		1 | 18  05  04  03  12  29
-		 * 		  |
-		 * 		Z | 19  06  01  02  11  28
-		 * 		  |
-		 * 	   -1 | 20  07  08  09  10  27
-		 * 		  |
-		 * 	   -2 | 21  22  23  24  25  26
-		 * 		  +-----------------------
-		 * 			-2  -1   X   1   2   3
-		 * 	etc.
-		 */
-		
-		static int n = 1;				//number
-		static int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
-		static int D = 1;				//distance to travel
-		static int d = 0;				//distance already traveled
-		static boolean B = false;		//OK to change direction?
-		static void reset() 
+	/*	The pattern:
+	 * 
+	 * 		3 | 36  35  34  33  32  31
+	 * 		  |
+	 * 		2 | 17  16  15  14  13  30
+	 * 		  |
+	 * 		1 | 18  05  04  03  12  29
+	 * 		  |
+	 * 		Z | 19  06  01  02  11  28
+	 * 		  |
+	 * 	   -1 | 20  07  08  09  10  27
+	 * 		  |
+	 * 	   -2 | 21  22  23  24  25  26
+	 * 		  +-----------------------
+	 * 			-2  -1   X   1   2   3
+	 * 	etc.
+	 */
+	
+	int n = 1;				//number
+	int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
+	int D = 1;				//distance to travel
+	int d = 0;				//distance already traveled
+	boolean B = false;		//OK to change direction?
+	
+	private void setNextRegion() 
+	{
+		n++;
+		if (d != D) d++;
+		else
 		{
-			c = 1;
-			D = 1;
-			d = 0;
-			B = false;
-		}
-		static void setNextRegion() 
-		{
-			n++;
-			if (d != D) d++;
-			else
-			{
-				d = 0;	
-				D++;
-				switch (c){
-					case 1 : currentRegion[0]++;
-					case 2 : currentRegion[1]++;
-					case 3 : currentRegion[0]--;
-					case 4 : 
-						currentRegion[1]--;
-						c = B ? 1 : c + 1;
-				}
-				B = !B;
+			d = 0;	
+			D++;
+			switch (c){
+				case 1 : currentRegion[0]++;
+				case 2 : currentRegion[1]++;
+				case 3 : currentRegion[0]--;
+				case 4 : 
+					currentRegion[1]--;
+					c = B ? 1 : c + 1;
 			}
+			B = !B;
 		}
-		static boolean complete(){
-			return n == totalRegions;
-		}
+	}
+	private boolean complete(){
+		return n == process.totalRegions;
 	}
 	
 	
@@ -139,11 +118,11 @@ public class LoadSaveProcess implements Runnable {
 	
 	private static final class Map 
 	{
-		private static int[] 		 lowerleft;
-		private static int[][][][][] allChunkCoords;
-		static void init(int w,int[] lowerleft)
+		private int[] lowerleft;
+		private int[][][][][] allChunkCoords;
+		Map(int w,int[] lowerleft)
 		{
-			Map.lowerleft = lowerleft;
+			this.lowerleft = lowerleft;
 			allChunkCoords = new int[w][w][32][32][2];
 
 			int regionX = lowerleft[0];
@@ -179,11 +158,11 @@ public class LoadSaveProcess implements Runnable {
 					negX = regionX < 0;
 			}
 		}
-		static int[][][] getChunksCurrentRegion(){
+		int[][][] getChunksCurrentRegion(){
 			return 
 					allChunkCoords
-					[  currentRegion[0] - lowerleft[0]  ]
-					[  currentRegion[1] - lowerleft[1]  ];
+					[  process.currentRegion[0] - lowerleft[0]  ]
+					[  process.currentRegion[1] - lowerleft[1]  ];
 		}
 	}	
 	
@@ -191,10 +170,10 @@ public class LoadSaveProcess implements Runnable {
 	//==================================RUN=================================
 	public void run() 
 	{
-		if (taskRunning) return;
-		else taskRunning = true;
+		if (!ready) return;
+		else ready = false;
 		
-		int[][][] r = Map.getChunksCurrentRegion();
+		int[][][] r = map.getChunksCurrentRegion();
 		for (int[][] xRow : r)
 		{
 			for (int[] chunk : xRow)
@@ -203,18 +182,9 @@ public class LoadSaveProcess implements Runnable {
 				world.unloadChunk(chunk[0], chunk[1]);
 			}
 		}
-		SavePattern.setNextRegion();
-		if (SavePattern.complete())
-		{
-			
-		}
-		if (untilSaveProg == 0)
-		{
-			untilSaveProg = 9;
-			saveProgress();
-		}else 
-			untilSaveProg--;
+		setNextRegion();
 		
-	}
-	
+		if (complete()) finish();
+		else ready = true;
+	}	
 }
