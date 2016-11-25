@@ -2,7 +2,7 @@ package iieLoadSaveEntireWorld;
 
 import org.bukkit.scheduler.BukkitTask;
 
-public class UnusedPattern {
+public class LoadSaveProcessOld {
 	
 	/*	the contents of this class are static because
 	 * 	loading and saving an entire world is an intensive process,

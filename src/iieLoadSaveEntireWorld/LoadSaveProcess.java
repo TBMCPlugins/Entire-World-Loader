@@ -4,23 +4,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitTask;
 
-public class LoadSaveProcess implements Runnable {
+public class LoadSaveProcess implements Runnable 
+{
 	
 	//=================================INIT=================================
-	static boolean processOngoing = false;
-	static LoadSaveProcess process;
-	static BukkitTask bukkitTask;	
-			
-	boolean ready = true;
-	final Map map;
-	final World world;
-	final String worldname;
-	final int totalRegions;
-	int[] currentRegion;
+	static 	LoadSaveProcess process;
+	static 	BukkitTask 		bukkitTask;	
+	static 	boolean 		inProgress 	= false;
+			boolean 		ready 		= true;
+	
+	final 	Map 			map;
+	final 	World 			world;
+	final 	String 			worldname;
+	final 	int 			totalRegions;
+			int[] 			currentRegion;
 
-	LoadSaveProcess(
-			String name, int width, int[] center, int[] lowerleft
-			)
+	LoadSaveProcess(String name, int width, int[] lowerleft, int[] center)
 	{
 		map 			= new Map(width, lowerleft);
 		world 			= Bukkit.getWorld(name);
@@ -30,8 +29,7 @@ public class LoadSaveProcess implements Runnable {
 	}
 	LoadSaveProcess(
 			String name, int width, int[] lowerleft, 
-			int[] current, int n, int c, int D, int d, boolean B
-			)
+			int[] current, int n, int c, int D, int d, boolean B)
 	{
 		map 			= new Map(width, lowerleft);
 		world 			= Bukkit.getWorld(name);
@@ -47,7 +45,12 @@ public class LoadSaveProcess implements Runnable {
 	
 	
 	//===============================CONTROLS===============================
-	static void start(String name)
+	static void start(String name,WorldObject d)
+	{
+		process = new LoadSaveProcess	(name, d.width, d.lowerleft, d.current);
+		ConfigManager.addNew			(name, d.width, d.lowerleft, d.current);
+	}
+	static void resume(String name)
 	{
 		
 	}
@@ -60,7 +63,7 @@ public class LoadSaveProcess implements Runnable {
 		bukkitTask.cancel();
 		process = null;
 		System.gc();
-		processOngoing = false;
+		inProgress = false;
 	}
 
 	

@@ -28,6 +28,5 @@ public class Main extends JavaPlugin {
 		saveDefaultConfig();
 		getCommand("beginloadsave").setExecutor(start);
 		getCommand("stoploadsave").setExecutor(stop);
-		Cache.generate();
 	}
 }

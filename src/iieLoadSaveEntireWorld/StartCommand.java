@@ -1,5 +1,6 @@
 package iieLoadSaveEntireWorld;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,27 +16,23 @@ public class StartCommand implements CommandExecutor {
 	@Override
 	public synchronized boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
 	{
-		String worldName = ((Player)sender).getWorld().getName();
+		String worldname = ((Player)sender).getWorld().getName();
 		if (LoadSaveProcess.inProgress)
 		{
-			sender.sendMessage("a process is already running (" + worldName + "). /StopLoadSave to stop.");
+			sender.sendMessage("a process is already running (" + worldname + "). /StopLoadSave to stop.");
 			return false;
 		}
 		else LoadSaveProcess.inProgress = true;
-		
-		
-		if ((Cache.isUnfinished(worldName)))
+		if (ConfigManager.isNew(worldname))
 		{
-			sender.sendMessage("resuming...");
-			LoadSaveProcess.resume(worldName);
+			sender.sendMessage("starting...");
+			LoadSaveProcess.start(worldname, Dimensions.generate(args));
 		}
 		else
 		{
-			Dimensions d = new Dimensions(args);
-			LoadSaveProcess.start( d.width, d.center, d.lowerleft, worldName );
+			sender.sendMessage("resuming...");
+			LoadSaveProcess.resume(worldname);
 		}
-		
-		
 		Main.task = Bukkit.getScheduler().runTaskTimer( plugin, Main.process, 0, 100 );
 		return true;
 	}
