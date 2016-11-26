@@ -11,6 +11,7 @@ public class LoadProcess implements Runnable
 	final 	String 			worldname;
 	final 	int 			totalRegions;
 			int[] 			currentRegion;
+			int				width;
 
 			
 	LoadProcess(String name, WorldObject newWorld)
@@ -22,6 +23,7 @@ public class LoadProcess implements Runnable
 		currentRegion 	= newWorld.current;
 		
 		this.lowerleft 	= newWorld.lowerleft;
+		width			= newWorld.width;
 		allChunkCoords 	= generateAllChunkCoords(newWorld.width, newWorld.lowerleft);
 	}
 	LoadProcess(String name)
@@ -35,6 +37,7 @@ public class LoadProcess implements Runnable
 		currentRegion 	= unfinished.current;
 		
 		this.lowerleft 	= unfinished.lowerleft;
+		width			= unfinished.width;
 		allChunkCoords 	= generateAllChunkCoords(unfinished.width, unfinished.lowerleft);
 		
 		this.n 	= unfinished.n;
@@ -97,7 +100,7 @@ public class LoadProcess implements Runnable
 	
 	//===============================CHUNK MAP==============================
 	
-	private final int[] lowerleft;
+	final int[] lowerleft;
 	private final int[][][][][] allChunkCoords;
 	private final int[][][][][] generateAllChunkCoords(int w,int[] lowerleft)
 	{

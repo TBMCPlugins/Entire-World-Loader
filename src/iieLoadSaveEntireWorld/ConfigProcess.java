@@ -1,5 +1,6 @@
 package iieLoadSaveEntireWorld;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigProcess implements Runnable {
@@ -22,13 +23,13 @@ public class ConfigProcess implements Runnable {
 						config.getInt(name + ".width"),
 						new int[]
 								{	
-										config.getInt(name + ".currentRegion.x"),
-										config.getInt(name + ".currentRegion.z")
+										config.getInt(name + ".lowerleft.x"),
+										config.getInt(name + ".lowerleft.z")
 										},
 						new int[]
 								{	
-										config.getInt(name + ".lowerleft.x"),
-										config.getInt(name + ".lowerleft.z")
+										config.getInt(name + ".currentRegion.x"),
+										config.getInt(name + ".currentRegion.z")
 										},
 						config.getInt(name + ".n"),
 						config.getInt(name + ".c"),
@@ -45,6 +46,12 @@ public class ConfigProcess implements Runnable {
 	{
 		if(config == null)
 			config = Main.getPlugin().getConfig();
+		Bukkit.getLogger().info("Loading in progress: " + name
+				+ "[" + TaskManager.loadProcess.currentRegion[0] + ","
+				+ TaskManager.loadProcess.currentRegion[1] + "]");
+		config.set(name + ".width", TaskManager.loadProcess.width);
+		config.set(name + ".lowerleft.x", TaskManager.loadProcess.lowerleft[0]);
+		config.set(name + ".lowerleft.z", TaskManager.loadProcess.lowerleft[1]);
 		config.set(name + ".currentRegion.x", TaskManager.loadProcess.currentRegion[0]);
 		config.set(name + ".currentRegion.z", TaskManager.loadProcess.currentRegion[1]);
 		config.set(name + ".n", TaskManager.loadProcess.n);
