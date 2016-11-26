@@ -2,3 +2,8 @@ name: Entire-World-Loader
 main: iieLoadSaveEntireWorld.Main
 version: 4.0
 author: TBMCPlugins
+commands:
+  beginfullmapload:
+    description: ''
+  stopfullmapload:
+    description: ''
