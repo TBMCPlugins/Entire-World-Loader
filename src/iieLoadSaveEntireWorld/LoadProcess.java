@@ -83,14 +83,16 @@ public class LoadProcess implements Runnable
 			d = 0;	
 			D++;
 			switch (c){
-				case 1 : currentRegion[0]++;
-				case 2 : currentRegion[1]++;
-				case 3 : currentRegion[0]--;
+				case 1 : currentRegion[0]++; break;
+				case 2 : currentRegion[1]++; break;
+				case 3 : currentRegion[0]--; break;
 				case 4 : 
 					currentRegion[1]--;
 					c = B ? 1 : c + 1;
+					break;
 			}
 			B = !B;
+			c++;
 		}
 	}
 	final boolean isFinished(){
