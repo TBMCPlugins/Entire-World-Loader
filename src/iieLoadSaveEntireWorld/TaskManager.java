@@ -8,9 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class TaskManager {
-	
-	private static final Main plugin = new Main();
-	
 	static	boolean 		inProgress = false;
 	static 	LoadProcess 	loadProcess;
 	static	ConfigProcess 	configProcess;
@@ -22,8 +19,9 @@ public class TaskManager {
 	{
 		inProgress = true;
 		TaskManager.loadProcess = loadProcess;
-		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 10 );
-		TaskManager.configTask = Bukkit.getScheduler().runTaskTimer( plugin, new ConfigProcess(), 0, 200 );
+		TaskManager.configProcess = new ConfigProcess();
+		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( Main.getPlugin(), loadProcess, 0, 10 );
+		TaskManager.configTask = Bukkit.getScheduler().runTaskTimer( Main.getPlugin(), configProcess, 0, 200 );
 	}
 	static final void finish()
 	{

@@ -116,7 +116,7 @@ public class WorldObject {
 		//add margins------------
 		
 		final int[] edges = new int[4];
-		final int[] radii = new int[4];		
+		final int[] radii = new int[4];
 		final boolean[] margin = new boolean[4];
 		
 		//get block edge farthest from center
@@ -144,15 +144,15 @@ public class WorldObject {
 					if (!margin[3])//-----------0000
 						return bounds;
 					else//----------------------0001
-						if (radii[0] < radii[1])	
+						if (radii[0] < radii[1])
 							bounds[0]++;
 						else 
 							bounds[1]++;
 				else
 					if (!margin[3])//-----------0010
-						if (radii[0] < radii[1])	
+						if (radii[0] < radii[1])
 							bounds[0]++;
-						else 
+						else
 							bounds[1]++;
 					else//----------------------0011
 					{
@@ -162,7 +162,7 @@ public class WorldObject {
 			else
 				if (!margin[2])
 					if (!margin[3])//-----------0100
-						if (radii[2] < radii[3])	
+						if (radii[2] < radii[3])
 							bounds[2]++;
 						else 
 							bounds[3]++;
@@ -198,9 +198,9 @@ public class WorldObject {
 					if (margin[3])//------------1001
 						return bounds;
 					else//----------------------1000
-						if (radii[2] == radii[3])	
+						if (radii[2] == radii[3])
 							bounds[0]++;
-						else 
+						else
 							bounds[1]++;
 		
 		return bounds;

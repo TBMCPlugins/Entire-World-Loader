@@ -5,15 +5,18 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ConfigProcess implements Runnable {
 	
 	//STATIC
-	private static final Main plugin = new Main();
-	private static final FileConfiguration config = plugin.getConfig();
+	private static FileConfiguration config;
 	
 	static final boolean isNew(String name)
 	{
+		if(config == null)
+			config = Main.getPlugin().getConfig();
 		return !config.contains(name);
 	}
 	static final WorldObject getUnfinished(String name)
 	{
+		if(config == null)
+			config = Main.getPlugin().getConfig();
 		return new WorldObject
 				(
 						config.getInt(name + ".width"),
@@ -40,19 +43,23 @@ public class ConfigProcess implements Runnable {
 	private final String name = TaskManager.loadProcess.worldname;
 	public final void run()
 	{
-		config.set(".currentRegion.x", TaskManager.loadProcess.currentRegion[0]);
-		config.set(".currentRegion.z", TaskManager.loadProcess.currentRegion[1]);
-		config.set(".n", TaskManager.loadProcess.n);
-		config.set(".c", TaskManager.loadProcess.c);
-		config.set(".D", TaskManager.loadProcess.D);
-		config.set(".d", TaskManager.loadProcess.d);
-		config.set(".B", TaskManager.loadProcess.B ? 1 : 0);
-		plugin.saveConfig();
+		if(config == null)
+			config = Main.getPlugin().getConfig();
+		config.set(name + ".currentRegion.x", TaskManager.loadProcess.currentRegion[0]);
+		config.set(name + ".currentRegion.z", TaskManager.loadProcess.currentRegion[1]);
+		config.set(name + ".n", TaskManager.loadProcess.n);
+		config.set(name + ".c", TaskManager.loadProcess.c);
+		config.set(name + ".D", TaskManager.loadProcess.D);
+		config.set(name + ".d", TaskManager.loadProcess.d);
+		config.set(name + ".B", TaskManager.loadProcess.B ? 1 : 0);
+		Main.getPlugin().saveConfig();
 	}
 	final void finish()
 	{
+		if(config == null)
+			config = Main.getPlugin().getConfig();
 		config.set("finished", name);
 		config.set(name, null);
-		plugin.saveConfig();
+		Main.getPlugin().saveConfig();
 	}
 }
