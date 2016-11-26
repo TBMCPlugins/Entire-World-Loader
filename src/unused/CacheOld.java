@@ -1,11 +1,15 @@
-package iieLoadSaveEntireWorld;
+package unused;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import iieLoadSaveEntireWorld.Main;
+
 public class CacheOld 
 {
+/*	
+	
 	private static int maxNameLength;
 	private static char[][] listUnfinished;
 	private static Map<String,WorldStatus> cacheUnfinished;
@@ -115,4 +119,5 @@ public class CacheOld
 			this.B = B;
 		}
 	}
+*/
 }
