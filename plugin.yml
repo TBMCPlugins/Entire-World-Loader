@@ -6,4 +6,4 @@ commands:
   beginfullmapload:
     description: ''
   stopfullmapload:
-    description: ''
+    description: loads and saves the entire map, in 32x32 chunk sections
