@@ -11,7 +11,9 @@ public class TaskManager {
 	
 	static Main plugin;
 	
-	static	boolean 		inProgress = false;
+	static boolean inProgress = false;
+	static boolean canRun = true;
+	
 	static 	LoadProcess 	loadProcess;
 	static	ConfigProcess 	configProcess;
 	static	BukkitTask 		loadTask;
@@ -31,10 +33,23 @@ public class TaskManager {
 			loadProcess = new LoadProcess(name);
 			isNew = false;
 		}
-		TaskManager.configProcess = new ConfigProcess();
-		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 10 );
-		TaskManager.configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 0, 200 );
+		configProcess = new ConfigProcess();
+		loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 100 );
+		configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 0, 200 );
 		return isNew;
+	}
+	static final boolean crashResume()
+	{
+		if (ConfigProcess.crashResume())
+		{
+			loadProcess = new LoadProcess(ConfigProcess.getCrashResume());
+			configProcess = new ConfigProcess(false);
+			
+			loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 1200, 100 );
+			configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 1200, 200 );
+			return true;
+		}
+		return false;
 	}
 	static final void finish()
 	{
@@ -53,12 +68,12 @@ public class TaskManager {
 	{
 		if (inProgress)
 		{
-			if (loadProcess.isFinished()) finish();
+			if (loadProcess.n == loadProcess.totalRegions) finish();
 			else
 			{
 				loadTask.cancel();
 				configTask.cancel();
-				configProcess.run();
+				configProcess.stop();
 				
 				loadProcess = null;
 				configProcess = null;

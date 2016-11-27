@@ -12,13 +12,13 @@ public class ConfigProcess implements Runnable {
 	{
 		return !config.contains(name);
 	}
-	static final void addNew(String name, int width, int[] lowerleft, int[] center)
+	static final void addNew(String name, WorldObject newWorld)
 	{
-		config.set(name + ".width", width);
-		config.set(name + ".lowerleft.x", lowerleft[0]);
-		config.set(name + ".lowerleft.z", lowerleft[1]);
-		config.set(name + ".currentRegion.x", center[0]);
-		config.set(name + ".currentRegion.z", center[1]);
+		config.set(name + ".width", newWorld.width);
+		config.set(name + ".lowerleft.x", newWorld.lowerleft[0]);
+		config.set(name + ".lowerleft.z", newWorld.lowerleft[1]);
+		config.set(name + ".currentRegion.x", newWorld.current[0]);
+		config.set(name + ".currentRegion.z", newWorld.current[1]);
 		config.set(name + ".n", 1);
 		config.set(name + ".c", 1);
 		config.set(name + ".D", 1);
@@ -48,10 +48,26 @@ public class ConfigProcess implements Runnable {
 						config.getInt(name + ".B") == 1
 						);		
 	}
+	static final boolean crashResume()
+	{
+		return config.contains("@ CRASH RESUME");
+	}
+	static final String getCrashResume()
+	{
+		return config.getString("@ CRASH RESUME");
+	}
 	
 	
 	//INSTANCE
 	private final String name = TaskManager.loadProcess.worldname;
+	ConfigProcess()
+	{
+		config.set("@ CRASH RESUME", name);
+	}
+	ConfigProcess(boolean b)
+	{
+		//don't create crash resume
+	}
 	public final void run()
 	{
 		final int[] currentRegion = TaskManager.loadProcess.currentRegion;
@@ -74,8 +90,17 @@ public class ConfigProcess implements Runnable {
 	}
 	final void finish()
 	{
-		config.set("finished worlds, fully saved", name);
+		config.set("@ FINISHED WORLDS", name);
+		config.set("@ CRASH RESUME", null);
 		config.set(name, null);
 		plugin.saveConfig();
+	}
+	final void stop()
+	{
+		run();
+		config.set("@ CRASH RESUME", null); 
+		plugin.saveConfig();
+		Bukkit.getLogger().info("...stopping world-load");
+		
 	}
 }

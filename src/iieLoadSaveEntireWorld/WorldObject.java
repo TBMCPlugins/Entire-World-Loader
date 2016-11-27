@@ -45,15 +45,27 @@ public class WorldObject {
 			return new WorldObject();
 		}
 		int[] bounds = regionBounds(new ParsedArgs(args));
-		
-		return new WorldObject( 
-				bounds[2] - bounds[0],
-				new int[]{ bounds[0], bounds[2] },
-				new int[]{
-						bounds[0] - 1 + (bounds[1]-bounds[0] + 1)/2, 
-						bounds[2] - 1 + (bounds[3]-bounds[2] + 1)/2 
-						} 
-				);
+		return new WorldObject
+				( 
+						bounds[2] - bounds[0],//----------------------------width
+						new int[] { bounds[0], bounds[2] },//---------------lowerleft
+						new int[] { //--------------------------------------center
+								bounds[0] - 1 + (bounds[1]-bounds[0] + 1)/2, 
+								bounds[2] - 1 + (bounds[3]-bounds[2] + 1)/2 
+								} 
+						);
+		/* 	for even widths, the math above returns the 
+		 * 	minimum center not the maximum center. So:
+		 * 
+		 * 		* * * *
+		 * 		* X X *
+		 * 		* O X *
+		 * 		* * * *
+		 * 
+		 * 	the spiral pattern used in LoadProcess rotates
+		 * 	counter-clockwise, so it must begin at minimum 
+		 * 	center.
+		 */
 	}
 	//==============================================================================
 	private static final class ParsedArgs

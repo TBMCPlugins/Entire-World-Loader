@@ -7,22 +7,24 @@ public class LoadProcess implements Runnable
 {
 	//=================================INIT=================================
 	
-	final 	World 			world;
-	final 	String 			worldname;
-	final 	int 			totalRegions;
-			int[] 			currentRegion;
+	final 	World 	world;
+	final 	String 	worldname;
+	final 	int 	totalRegions;
+			int[] 	currentRegion;
 
 			
 	LoadProcess(String name, WorldObject newWorld)
 	{
+		ConfigProcess.addNew(name, newWorld);
+		
 		world 			= Bukkit.getWorld(name);
 		worldname 		= name;
 		
 		totalRegions	= newWorld.width * newWorld.width;
 		currentRegion 	= newWorld.current;
 		
-		this.lowerleft 	= newWorld.lowerleft;
-		allChunkCoords 	= generateAllChunkCoords(newWorld.width, newWorld.lowerleft);
+		lowerleft 		= newWorld.lowerleft;
+		allChunkCoords 	= generateAllChunkCoords(newWorld.width);
 	}
 	LoadProcess(String name)
 	{
@@ -34,14 +36,14 @@ public class LoadProcess implements Runnable
 		totalRegions	= unfinished.width * unfinished.width;
 		currentRegion 	= unfinished.current;
 		
-		this.lowerleft 	= unfinished.lowerleft;
-		allChunkCoords 	= generateAllChunkCoords(unfinished.width, unfinished.lowerleft);
+		lowerleft	 	= unfinished.lowerleft;
+		allChunkCoords 	= generateAllChunkCoords(unfinished.width);
 		
-		this.n 	= unfinished.n;
-		this.c 	= unfinished.c;
-		this.D 	= unfinished.D;
-		this.d 	= unfinished.d;
-		this.B 	= unfinished.B;
+		n = unfinished.n;
+		c = unfinished.c;
+		D = unfinished.D;
+		d = unfinished.d;
+		B = unfinished.B;
 	}
 
 	
@@ -71,14 +73,15 @@ public class LoadProcess implements Runnable
 	int d = 0;				//distance already traveled
 	boolean B = false;		//OK to increase distance?
 	
-	private final void setNextRegion() 
+	private final boolean setNextRegion() 
 	{
 		n++;
+		if (n == totalRegions) return false;
 		if (d != D) d++;
 		else
 		{
-			d = 0;		if (B) D++;		B = !B;
-			
+			d = 0;		if (B) D++;		
+			B = !B;
 			c = c == 4 ? 1 : c + 1;
 		}
 		switch (c)
@@ -88,9 +91,7 @@ public class LoadProcess implements Runnable
 			case 3 : currentRegion[0]--; break;
 			case 4 : currentRegion[1]--; break;
 		}
-	}
-	final boolean isFinished(){
-		return n == totalRegions;
+		return true;
 	}
 	
 	
@@ -98,7 +99,7 @@ public class LoadProcess implements Runnable
 	
 	private final int[] lowerleft;
 	private final int[][][][][] allChunkCoords;
-	private final int[][][][][] generateAllChunkCoords(int w,int[] lowerleft)
+	private final int[][][][][] generateAllChunkCoords(int w)
 	{
 		int[][][][][] allChunkCoords = new int[w][w][32][32][2];
 
@@ -145,8 +146,7 @@ public class LoadProcess implements Runnable
 	
 	
 	//==================================RUN=================================
-	
-	private boolean ready = true;
+	private static volatile boolean ready = true;
 	public final void run() 
 	{
 		if (!ready) return;
@@ -161,9 +161,10 @@ public class LoadProcess implements Runnable
 				world.unloadChunk(chunk[0], chunk[1]);
 			}
 		}
-		setNextRegion();
-		
-		if (isFinished()) TaskManager.finish();
-		else ready = true;
+		if (!setNextRegion())
+		{
+			TaskManager.finish();
+		}
+		ready = true;
 	}	
 }
