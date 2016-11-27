@@ -65,7 +65,7 @@ public class LoadProcess implements Runnable
 	 * 	etc.
 	 */
 	
-	int n = 1;				//number
+	int n = 1;				//how many regions have been saved already
 	int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
 	int D = 1;				//distance to travel
 	int d = 0;				//distance already traveled
@@ -77,16 +77,16 @@ public class LoadProcess implements Runnable
 		if (d != D) d++;
 		else
 		{
-			d = 0;	
-			if (B) D++;
-			switch (c){
-				case 1 : currentRegion[0]++; c++; break;
-				case 2 : currentRegion[1]++; c++; break;
-				case 3 : currentRegion[0]--; c++; break;
-				case 4 : currentRegion[1]--; c=1; break;
-			}
-			B = !B;
-			c++;
+			d = 0;		if (B) D++;		B = !B;
+			
+			c = c == 4 ? 1 : c + 1;
+		}
+		switch (c)
+		{
+			case 1 : currentRegion[0]++; break;
+			case 2 : currentRegion[1]++; break;
+			case 3 : currentRegion[0]--; break;
+			case 4 : currentRegion[1]--; break;
 		}
 	}
 	final boolean isFinished(){
