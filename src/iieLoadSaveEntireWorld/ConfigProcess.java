@@ -6,9 +6,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ConfigProcess implements Runnable {
 	
 	//STATIC
-	private static final Main plugin = new Main();
-	private static final FileConfiguration config = plugin.getConfig();
-	
+	static Main plugin;
+	static FileConfiguration config;
 	static final boolean isNew(String name)
 	{
 		return !config.contains(name);
@@ -75,7 +74,7 @@ public class ConfigProcess implements Runnable {
 	}
 	final void finish()
 	{
-		config.set("finished", name);
+		config.set("finished worlds, fully saved", name);
 		config.set(name, null);
 		plugin.saveConfig();
 	}
