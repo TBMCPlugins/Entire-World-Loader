@@ -32,7 +32,7 @@ public class TaskManager {
 			isNew = false;
 		}
 		TaskManager.configProcess = new ConfigProcess();
-		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 5 );
+		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 2 );
 		TaskManager.configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 0, 200 );
 		return isNew;
 	}
