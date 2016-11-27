@@ -15,19 +15,29 @@ public class TaskManager {
 	static	BukkitTask 		configTask;
 	
 	//===================================CONTROLS===================================
-	private static final void start(LoadProcess loadProcess)
+	private static final boolean start(String name, String[] args)
 	{
-		inProgress = true;
-		TaskManager.loadProcess = loadProcess;
+		final boolean isNew;
+		if (ConfigProcess.isNew(name))
+		{
+			loadProcess = new LoadProcess(name, WorldObject.generate(args));
+			isNew = true;
+		}
+		else
+		{
+			loadProcess = new LoadProcess(name);
+			isNew = false;
+		}
 		TaskManager.configProcess = new ConfigProcess();
 		TaskManager.loadTask = Bukkit.getScheduler().runTaskTimer( Main.getPlugin(), loadProcess, 0, 10 );
 		TaskManager.configTask = Bukkit.getScheduler().runTaskTimer( Main.getPlugin(), configProcess, 0, 200 );
+		return isNew;
 	}
 	static final void finish()
 	{
-		configProcess.finish();
 		loadTask.cancel();
 		configTask.cancel();
+		configProcess.finish();
 		
 		loadProcess = null;
 		configProcess = null;
@@ -67,23 +77,19 @@ public class TaskManager {
 		@Override
 		public final boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
 		{
-			String name = ((Player)sender).getWorld().getName();
 			if (inProgress)
 			{
-				sender.sendMessage("a process is already running (" + name + "). /StopLoadSave to stop.");
+				sender.sendMessage("a process is already running (" + loadProcess.worldname + "). /StopLoadSave to stop.");
 				return false;
 			}
 			else inProgress = true;
-			
-			if (ConfigProcess.isNew(name))
+			if (start(((Player)sender).getWorld().getName(),args))
 			{
 				sender.sendMessage("starting...");
-				start(new LoadProcess(name, WorldObject.generate(args)));
 			}
 			else
 			{
 				sender.sendMessage("resuming...");
-				start(new LoadProcess(name));
 			}
 			return true;
 		}

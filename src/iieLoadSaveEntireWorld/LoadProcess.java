@@ -11,7 +11,6 @@ public class LoadProcess implements Runnable
 	final 	String 			worldname;
 	final 	int 			totalRegions;
 			int[] 			currentRegion;
-			int				width;
 
 			
 	LoadProcess(String name, WorldObject newWorld)
@@ -23,7 +22,6 @@ public class LoadProcess implements Runnable
 		currentRegion 	= newWorld.current;
 		
 		this.lowerleft 	= newWorld.lowerleft;
-		width			= newWorld.width;
 		allChunkCoords 	= generateAllChunkCoords(newWorld.width, newWorld.lowerleft);
 	}
 	LoadProcess(String name)
@@ -37,7 +35,6 @@ public class LoadProcess implements Runnable
 		currentRegion 	= unfinished.current;
 		
 		this.lowerleft 	= unfinished.lowerleft;
-		width			= unfinished.width;
 		allChunkCoords 	= generateAllChunkCoords(unfinished.width, unfinished.lowerleft);
 		
 		this.n 	= unfinished.n;
@@ -72,7 +69,7 @@ public class LoadProcess implements Runnable
 	int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
 	int D = 1;				//distance to travel
 	int d = 0;				//distance already traveled
-	boolean B = false;		//OK to change direction?
+	boolean B = false;		//OK to increase distance?
 	
 	private final void setNextRegion() 
 	{
@@ -81,14 +78,14 @@ public class LoadProcess implements Runnable
 		else
 		{
 			d = 0;	
-			D++;
+			if (B) D++;
 			switch (c){
 				case 1 : currentRegion[0]++; break;
 				case 2 : currentRegion[1]++; break;
 				case 3 : currentRegion[0]--; break;
 				case 4 : 
 					currentRegion[1]--;
-					c = B ? 1 : c + 1;
+					c = c == 4 ? 1 : c + 1;
 					break;
 			}
 			B = !B;
@@ -102,7 +99,7 @@ public class LoadProcess implements Runnable
 	
 	//===============================CHUNK MAP==============================
 	
-	final int[] lowerleft;
+	private final int[] lowerleft;
 	private final int[][][][][] allChunkCoords;
 	private final int[][][][][] generateAllChunkCoords(int w,int[] lowerleft)
 	{
@@ -152,7 +149,7 @@ public class LoadProcess implements Runnable
 	
 	//==================================RUN=================================
 	
-	boolean ready = true;
+	private boolean ready = true;
 	public final void run() 
 	{
 		if (!ready) return;

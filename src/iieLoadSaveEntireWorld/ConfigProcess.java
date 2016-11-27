@@ -6,18 +6,29 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ConfigProcess implements Runnable {
 	
 	//STATIC
-	private static FileConfiguration config;
+	private static final Main plugin = new Main();
+	private static final FileConfiguration config = plugin.getConfig();
 	
 	static final boolean isNew(String name)
 	{
-		if(config == null)
-			config = Main.getPlugin().getConfig();
 		return !config.contains(name);
+	}
+	static final void addNew(String name, int width, int[] lowerleft, int[] center)
+	{
+		config.set(name + ".width", width);
+		config.set(name + ".lowerleft.x", lowerleft[0]);
+		config.set(name + ".lowerleft.z", lowerleft[1]);
+		config.set(name + ".currentRegion.x", center[0]);
+		config.set(name + ".currentRegion.z", center[1]);
+		config.set(name + ".n", 1);
+		config.set(name + ".c", 1);
+		config.set(name + ".D", 1);
+		config.set(name + ".d", 0);
+		config.set(name + ".B", 0);
+		plugin.saveConfig();
 	}
 	static final WorldObject getUnfinished(String name)
 	{
-		if(config == null)
-			config = Main.getPlugin().getConfig();
 		return new WorldObject
 				(
 						config.getInt(name + ".width"),
@@ -44,29 +55,28 @@ public class ConfigProcess implements Runnable {
 	private final String name = TaskManager.loadProcess.worldname;
 	public final void run()
 	{
-		if(config == null)
-			config = Main.getPlugin().getConfig();
-		Bukkit.getLogger().info("Loading in progress: " + name
-				+ "[" + TaskManager.loadProcess.currentRegion[0] + ","
-				+ TaskManager.loadProcess.currentRegion[1] + "]");
-		config.set(name + ".width", TaskManager.loadProcess.width);
-		config.set(name + ".lowerleft.x", TaskManager.loadProcess.lowerleft[0]);
-		config.set(name + ".lowerleft.z", TaskManager.loadProcess.lowerleft[1]);
-		config.set(name + ".currentRegion.x", TaskManager.loadProcess.currentRegion[0]);
-		config.set(name + ".currentRegion.z", TaskManager.loadProcess.currentRegion[1]);
+		final int[] currentRegion = TaskManager.loadProcess.currentRegion;
+		Bukkit.getLogger().info
+				(
+						"Saving world-load progress: " + name 
+						+ "["
+						+ currentRegion[0] + "," 
+						+ currentRegion[1] 
+						+ "]"
+						);
+		config.set(name + ".currentRegion.x", currentRegion[0]);
+		config.set(name + ".currentRegion.z", currentRegion[1]);
 		config.set(name + ".n", TaskManager.loadProcess.n);
 		config.set(name + ".c", TaskManager.loadProcess.c);
 		config.set(name + ".D", TaskManager.loadProcess.D);
 		config.set(name + ".d", TaskManager.loadProcess.d);
 		config.set(name + ".B", TaskManager.loadProcess.B ? 1 : 0);
-		Main.getPlugin().saveConfig();
+		plugin.saveConfig();
 	}
 	final void finish()
 	{
-		if(config == null)
-			config = Main.getPlugin().getConfig();
 		config.set("finished", name);
 		config.set(name, null);
-		Main.getPlugin().saveConfig();
+		plugin.saveConfig();
 	}
 }
