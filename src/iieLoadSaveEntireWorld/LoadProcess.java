@@ -7,37 +7,24 @@ public class LoadProcess implements Runnable
 {
 	//=================================INIT=================================
 	
-	final 	World 	world;
-	final 	String 	worldname;
-	final 	int 	totalRegions;
-			int[] 	currentRegion;
-
-			
-	LoadProcess(String name, WorldObject newWorld)
+	private final World world;
+	final int totalRegions;
+	int[] currentRegion;
+	LoadProcess(String name, WorldObj newWorld)
 	{
 		ConfigProcess.addNew(name, newWorld);
 		
 		world 			= Bukkit.getWorld(name);
-		worldname 		= name;
-		
-		totalRegions	= newWorld.width * newWorld.width;
+		totalRegions	= newWorld.total;
 		currentRegion 	= newWorld.current;
-		
-		lowerleft 		= newWorld.lowerleft;
-		allChunkCoords 	= generateAllChunkCoords(newWorld.width);
 	}
 	LoadProcess(String name)
 	{
-		final WorldObject unfinished = ConfigProcess.getUnfinished(name);
+		final WorldObj unfinished = ConfigProcess.getUnfinished(name);
 		
 		world 			= Bukkit.getWorld(name);
-		worldname 		= name;
-		
-		totalRegions	= unfinished.width * unfinished.width;
+		totalRegions	= unfinished.total;
 		currentRegion 	= unfinished.current;
-		
-		lowerleft	 	= unfinished.lowerleft;
-		allChunkCoords 	= generateAllChunkCoords(unfinished.width);
 		
 		n = unfinished.n;
 		c = unfinished.c;
@@ -75,15 +62,16 @@ public class LoadProcess implements Runnable
 	
 	private final boolean setNextRegion() 
 	{
-		n++;
+		
 		if (n == totalRegions) return false;
-		if (d != D) d++;
-		else
+		if (d == D)
 		{
-			d = 0;		if (B) D++;		
+			d = 1;		
+			if (B) D++;		
 			B = !B;
 			c = c == 4 ? 1 : c + 1;
 		}
+		else d++;
 		switch (c)
 		{
 			case 1 : currentRegion[0]++; break;
@@ -91,60 +79,27 @@ public class LoadProcess implements Runnable
 			case 3 : currentRegion[0]--; break;
 			case 4 : currentRegion[1]--; break;
 		}
+		n++;
 		return true;
 	}
 	
 	
-	//===============================CHUNK MAP==============================
-	
-	private final int[] lowerleft;
-	private final int[][][][][] allChunkCoords;
-	private final int[][][][][] generateAllChunkCoords(int w)
+	//==============================GET CHUNKS==============================
+	private final int[][][] getChunksCurrentRegion()
 	{
-		int[][][][][] allChunkCoords = new int[w][w][32][32][2];
-
-		int regionX = lowerleft[0];
-		int regionZ = lowerleft[1];
-		boolean negX = true;
-		boolean negZ = true;
-		int chunkX = 0;
-		int chunkZ = 0;
-		for (int[][][][] xRowRegions : allChunkCoords)
+		final int[][][] chunks = new int[32][32][2];
+		int z;
+		for (int x = 0; x < 32; x++)
 		{
-			regionZ = lowerleft[1];
-			negZ = true;
-			for (int[][][] region : xRowRegions)
+			z = 0;
+			for (; z < 32; z++)
 			{
-				chunkX = 0;
-				for (int[][] xRowChunks : region)
-				{
-					chunkZ = 0;
-					for (int[] chunk : xRowChunks)
-					{
-						chunk[0] = (regionX * 32) + (negX ? 0 - chunkX : chunkX);
-						chunk[1] = (regionZ * 32) + (negZ ? 0 - chunkZ : chunkZ);	
-						chunkZ++;
-					}
-					chunkX++;
-				}
-				regionZ++;
-				if (negZ)
-					negZ = regionZ < 0;
+				chunks[x][z][0] = (currentRegion[0] * 32) + x;
+				chunks[x][z][1] = (currentRegion[1] * 32) + z;	
 			}
-			regionX++;
-			if (negX) 
-				negX = regionX < 0;
 		}
-		return allChunkCoords;
+		return chunks;
 	}
-	private final int[][][] getChunksCurrentRegion(){
-		return 
-				allChunkCoords
-				[  currentRegion[0] - lowerleft[0]  ]
-				[  currentRegion[1] - lowerleft[1]  ];
-	}
-	
-	
 	//==================================RUN=================================
 	private static volatile boolean ready = true;
 	public final void run() 
@@ -158,7 +113,7 @@ public class LoadProcess implements Runnable
 			for (int[] chunk : xRow)
 			{
 				world.loadChunk(chunk[0], chunk[1], true);
-				world.unloadChunk(chunk[0], chunk[1]);
+				world.unloadChunkRequest(chunk[0], chunk[1]);
 			}
 		}
 		if (!setNextRegion())

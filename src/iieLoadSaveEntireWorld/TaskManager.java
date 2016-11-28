@@ -8,35 +8,36 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class TaskManager {
-	
-	static Main plugin;
-	
+		
 	static boolean inProgress = false;
-	static boolean canRun = true;
 	
-	static 	LoadProcess 	loadProcess;
-	static	ConfigProcess 	configProcess;
-	static	BukkitTask 		loadTask;
-	static	BukkitTask 		configTask;
+	static LoadProcess loadProcess;
+	static ConfigProcess configProcess;
+	private static BukkitTask loadTask;
+	private static BukkitTask configTask;
 	
-	//===================================CONTROLS===================================
-	private static final boolean start(String name, String[] args)
+	
+	//===================================CONTROLS==================================
+	
+	private static final void schedule(long delay)
 	{
-		final boolean isNew;
+		loadTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, delay, 100);
+		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, delay, 100);
+	}
+	//-----------------------------------------------------------------------------
+	private static final boolean start(String[] args, String name)
+	{
 		if (ConfigProcess.isNew(name))
 		{
-			loadProcess = new LoadProcess(name, WorldObject.generate(args));
-			isNew = true;
+			loadProcess = new LoadProcess(name, WorldObj.generate(args));
+			configProcess = new ConfigProcess(name);
+			schedule(0);
+			return true;
 		}
-		else
-		{
-			loadProcess = new LoadProcess(name);
-			isNew = false;
-		}
-		configProcess = new ConfigProcess();
-		loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 0, 100 );
-		configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 0, 200 );
-		return isNew;
+		loadProcess = new LoadProcess(name);
+		configProcess = new ConfigProcess(name);
+		schedule(0);
+		return false;
 	}
 	static final boolean crashResume()
 	{
@@ -44,18 +45,15 @@ public class TaskManager {
 		{
 			loadProcess = new LoadProcess(ConfigProcess.getCrashResume());
 			configProcess = new ConfigProcess(false);
-			
-			loadTask = Bukkit.getScheduler().runTaskTimer( plugin, loadProcess, 1200, 100 );
-			configTask = Bukkit.getScheduler().runTaskTimer( plugin, configProcess, 1200, 200 );
+			schedule(1200);
 			return true;
 		}
 		return false;
 	}
-	static final void finish()
+	static final void stop_or_finish()
 	{
 		loadTask.cancel();
 		configTask.cancel();
-		configProcess.finish();
 		
 		loadProcess = null;
 		configProcess = null;
@@ -63,6 +61,11 @@ public class TaskManager {
 		configTask = null;
 		
 		inProgress = false;
+	}
+	static final void finish()
+	{
+		configProcess.finish();
+		
 	}
 	static final boolean stop()
 	{
@@ -87,34 +90,10 @@ public class TaskManager {
 		return false;
 	}
 	
-	
 	//===================================COMMANDS===================================
-	
-	static final class StartCommand implements CommandExecutor
-	{
-		@Override
-		public final boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
-		{
-			if (inProgress)
-			{
-				sender.sendMessage("a process is already running (" + loadProcess.worldname + "). /StopLoadSave to stop.");
-				return false;
-			}
-			else inProgress = true;
-			if (start(((Player)sender).getWorld().getName(),args))
-			{
-				sender.sendMessage("starting...");
-			}
-			else
-			{
-				sender.sendMessage("resuming...");
-			}
-			return true;
-		}
-	}
+
 	static final class StopCommand implements CommandExecutor 
 	{
-		@Override
 		public final boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
 		{
 			if (stop())
@@ -124,6 +103,25 @@ public class TaskManager {
 			}
 			sender.sendMessage("nothing to stop.");
 			return false;
+		}
+	}
+	static final class StartCommand implements CommandExecutor
+	{
+		public final boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
+		{
+			if (inProgress)
+			{
+				sender.sendMessage("a process is already running (" + configProcess.name + "). /StopLoadSave to stop.");
+				return false;
+			}
+			inProgress = true;
+			sender.sendMessage
+			(
+					start(args,((Player)sender).getWorld().getName()) ?
+							"starting..." :
+								"resuming..."
+					);
+			return true;
 		}
 	}
 }

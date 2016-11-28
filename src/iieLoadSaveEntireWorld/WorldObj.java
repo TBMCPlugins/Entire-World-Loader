@@ -1,9 +1,8 @@
 package iieLoadSaveEntireWorld;
 
-public class WorldObject {
+public class WorldObj {
 	
-	final int 	width;
-	final int[] lowerleft;
+	final int 	total;
 		  int[] current;
 	int n;
 	int c;
@@ -11,25 +10,20 @@ public class WorldObject {
 	int d;
 	boolean B;
 	
-	WorldObject()
+	WorldObj()
 	{
-		width 		= 44;
-		lowerleft 	= new int[] { -22,	-22	};
+		total 		= 1936;		//44 * 44
 		current		= new int[] { -1,	-1	};
 	}
-	WorldObject(int width, int[] lowerleft, int[] center)
+	WorldObj(int total, int[] center)
 	{
-		this.width 		= width;
-		this.lowerleft 	= lowerleft;
+		this.total 		= total;
 		this.current	= center;
 	}
-	WorldObject(
-			int width, int[] lowerleft, int[] current, 
-			int n, int c, int D, int d, boolean B
-			)
+	WorldObj(int total, int[] current, 
+			int n, int c, int D, int d, boolean B)
 	{
-		this.width 		= width;
-		this.lowerleft 	= lowerleft;
+		this.total 		= total;
 		this.current	= current;
 		this.n = n;
 		this.c = c;
@@ -38,22 +32,22 @@ public class WorldObject {
 		this.B = B;
 	}
 		
-	static final WorldObject generate(String[] args)
+	static final WorldObj generate(String[] args)
 	{
-		if (args.length == 0)
-		{ 
-			return new WorldObject();
-		}
+		if (args.length == 0) return new WorldObj();
+		
 		int[] bounds = regionBounds(new ParsedArgs(args));
-		return new WorldObject
+		
+		return new WorldObj
 				( 
-						bounds[2] - bounds[0],//----------------------------width
-						new int[] { bounds[0], bounds[2] },//---------------lowerleft
-						new int[] { //--------------------------------------center
-								bounds[0] - 1 + (bounds[1]-bounds[0] + 1)/2, 
-								bounds[2] - 1 + (bounds[3]-bounds[2] + 1)/2 
-								} 
+						(bounds[2] - bounds[0]) * (bounds[2] - bounds[0]),//width ^ 2
+						new int[] 
+								{ 
+										bounds[0] - 1 + (bounds[1]-bounds[0] + 1)/2, 
+										bounds[2] - 1 + (bounds[3]-bounds[2] + 1)/2 
+										} 
 						);
+		
 		/* 	for even widths, the math above returns the 
 		 * 	minimum center not the maximum center. So:
 		 * 
@@ -118,14 +112,12 @@ public class WorldObject {
 	{
 		int[] bounds = new int[] 
 				{
-				//      [ get region ] [      get block      ]
 						Math.floorDiv( a.center[0] - a.radius, 512 ),
 						Math.floorDiv( a.center[0] + a.radius, 512 ),
 						Math.floorDiv( a.center[1] - a.radius, 512 ),
 						Math.floorDiv( a.center[1] + a.radius, 512 )
 						};
-		
-		//add margins------------
+		//add margins---------------------------------------------------------------
 		
 		final int[] edges = new int[4];
 		final int[] radii = new int[4];
@@ -143,7 +135,7 @@ public class WorldObject {
 		radii[2] = Math.abs(a.center[1] - edges[2]);
 		radii[3] = Math.abs(a.center[1] - edges[3]);
 		
-		//compare to original block radius, if difference is < 4 chunks add a region width
+		//compare to original block radius: if difference < 64 blocks add a region width
 		if (radii[0] - a.radius < 64) { bounds[0] -= 1;	margin[0] = true; }
 		if (radii[1] - a.radius < 64) { bounds[1] += 1;	margin[1] = true; }
 		if (radii[2] - a.radius < 64) { bounds[2] -= 1;	margin[2] = true; }
