@@ -9,10 +9,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class TaskManager {
 		
-	static boolean inProgress = false;
+	private static boolean inProgress = false;
 	
-	static LoadProcess loadProcess;
-	static ConfigProcess configProcess;
+			static LoadProcess loadProcess;
+	private static ConfigProcess configProcess;
 	private static BukkitTask loadTask;
 	private static BukkitTask configTask;
 	
@@ -22,7 +22,7 @@ public class TaskManager {
 	private static final void schedule(long delay)
 	{
 		loadTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, delay, 100);
-		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, delay, 100);
+		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, delay, 200);
 	}
 	//-----------------------------------------------------------------------------
 	private static final boolean start(String[] args, String name)
@@ -50,7 +50,7 @@ public class TaskManager {
 		}
 		return false;
 	}
-	static final void stop_or_finish()
+	private static final void stop_or_finish()
 	{
 		loadTask.cancel();
 		configTask.cancel();
@@ -65,25 +65,17 @@ public class TaskManager {
 	static final void finish()
 	{
 		configProcess.finish();
-		
+		stop_or_finish();
 	}
-	static final boolean stop()
+	private static final boolean stop()
 	{
 		if (inProgress)
 		{
 			if (loadProcess.n == loadProcess.totalRegions) finish();
 			else
 			{
-				loadTask.cancel();
-				configTask.cancel();
 				configProcess.stop();
-				
-				loadProcess = null;
-				configProcess = null;
-				loadTask = null;
-				configTask = null;
-				
-				inProgress = false;
+				stop_or_finish();
 			}
 			return true;
 		}

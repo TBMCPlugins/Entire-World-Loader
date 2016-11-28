@@ -10,6 +10,7 @@ public class LoadProcess implements Runnable
 	private final World world;
 	final int totalRegions;
 	int[] currentRegion;
+	
 	LoadProcess(String name, WorldObj newWorld)
 	{
 		ConfigProcess.addNew(name, newWorld);
@@ -18,6 +19,7 @@ public class LoadProcess implements Runnable
 		totalRegions	= newWorld.total;
 		currentRegion 	= newWorld.current;
 	}
+	
 	LoadProcess(String name)
 	{
 		final WorldObj unfinished = ConfigProcess.getUnfinished(name);
@@ -62,7 +64,6 @@ public class LoadProcess implements Runnable
 	
 	private final boolean setNextRegion() 
 	{
-		
 		if (n == totalRegions) return false;
 		if (d == D)
 		{
@@ -85,23 +86,30 @@ public class LoadProcess implements Runnable
 	
 	
 	//==============================GET CHUNKS==============================
+	
 	private final int[][][] getChunksCurrentRegion()
 	{
 		final int[][][] chunks = new int[32][32][2];
+		int xR = currentRegion[0] * 32;
+		int zR = currentRegion[1] * 32;
 		int z;
 		for (int x = 0; x < 32; x++)
 		{
 			z = 0;
 			for (; z < 32; z++)
 			{
-				chunks[x][z][0] = (currentRegion[0] * 32) + x;
-				chunks[x][z][1] = (currentRegion[1] * 32) + z;	
+				chunks[x][z][0] = xR + x;
+				chunks[x][z][1] = zR + z;	
 			}
 		}
 		return chunks;
 	}
+	
+	
 	//==================================RUN=================================
+	
 	private static volatile boolean ready = true;
+	private 	   volatile int unqueued = 0;
 	public final void run() 
 	{
 		if (!ready) return;
@@ -113,7 +121,7 @@ public class LoadProcess implements Runnable
 			for (int[] chunk : xRow)
 			{
 				world.loadChunk(chunk[0], chunk[1], true);
-				world.unloadChunkRequest(chunk[0], chunk[1]);
+				if (!world.unloadChunkRequest(chunk[0], chunk[1])) unqueued++;
 			}
 		}
 		if (!setNextRegion())

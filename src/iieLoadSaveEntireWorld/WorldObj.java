@@ -2,8 +2,8 @@ package iieLoadSaveEntireWorld;
 
 public class WorldObj {
 	
-	final int 	total;
-		  int[] current;
+	final int total;
+	int[] current;
 	int n;
 	int c;
 	int D;
@@ -12,7 +12,7 @@ public class WorldObj {
 	
 	WorldObj()
 	{
-		total 		= 1936;		//44 * 44
+		total 		= 1936;//(44*44)
 		current		= new int[] { -1,	-1	};
 	}
 	WorldObj(int total, int[] center)
@@ -57,7 +57,7 @@ public class WorldObj {
 		 * 		* * * *
 		 * 
 		 * 	the spiral pattern used in LoadProcess rotates
-		 * 	counter-clockwise, so it must begin at minimum 
+		 * 	east north west south, so it must begin at minimum 
 		 * 	center.
 		 */
 	}
@@ -118,7 +118,6 @@ public class WorldObj {
 						Math.floorDiv( a.center[1] + a.radius, 512 )
 						};
 		//add margins---------------------------------------------------------------
-		
 		final int[] edges = new int[4];
 		final int[] radii = new int[4];
 		final boolean[] margin = new boolean[4];

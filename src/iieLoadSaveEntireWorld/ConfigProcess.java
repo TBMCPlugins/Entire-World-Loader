@@ -5,11 +5,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigProcess implements Runnable {
 	
-	static Main plugin;				//initialized in Main onEnable()
-	static FileConfiguration config;//
-	
-	final String name;
 	//================================STATIC================================
+	static Main plugin;
+	static FileConfiguration config;
+	//----------------------------------------------------------------------
 	static final boolean isNew(String name)
 	{
 		return !config.contains(name);
@@ -53,6 +52,8 @@ public class ConfigProcess implements Runnable {
 	}
 	
 	//===============================INSTANCE===============================
+	final String name;
+	//----------------------------------------------------------------------
 	ConfigProcess(String name)
 	{
 		this.name = name;
