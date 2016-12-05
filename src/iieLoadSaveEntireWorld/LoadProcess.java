@@ -113,7 +113,6 @@ public class LoadProcess implements Runnable
 	//==================================RUN=================================
 	
 	private volatile boolean ready = true;
-	private volatile int unqueued = 0;
 	public final void run() 
 	{
 		if (!ready) return;
@@ -125,7 +124,7 @@ public class LoadProcess implements Runnable
 			for (int[] chunk : xRow)
 			{
 				world.loadChunk(chunk[0], chunk[1], true);
-				if (!world.unloadChunkRequest(chunk[0], chunk[1])) unqueued++;
+				world.unloadChunkRequest(chunk[0], chunk[1]);
 			}
 		}
 		if (!setNextRegion())

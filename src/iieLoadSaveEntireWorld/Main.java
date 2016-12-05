@@ -16,7 +16,7 @@ public class Main extends JavaPlugin {
 		
 		if (ConfigProcess.crashResume())
 		{
-			Bukkit.getScheduler().runTaskLater(this, new CrashResume(), 1200);
+			Bukkit.getScheduler().runTaskLater(this, new CrashResume(), 600);
 		}
 	}
 	private static final class CrashResume implements Runnable
