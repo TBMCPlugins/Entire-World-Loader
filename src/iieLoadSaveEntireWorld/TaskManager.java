@@ -17,15 +17,29 @@ public class TaskManager {
 	private static BukkitTask configTask;
 	
 	
-	//===================================CONTROLS==================================
+	//=====================================UTIL====================================
 	
 	private static final void schedule()
 	{
-		loadTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, 0, 200);
-		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, 0, 400);
+		loadTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, 0, 200);
+		configTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, 100, 200);
 	}
-	//-----------------------------------------------------------------------------
-	static final boolean start(String[] args, String name)
+	private static final void closedown()
+	{
+		loadTask.cancel();
+		configTask.cancel();
+		
+		loadProcess = null;
+		configProcess = null;
+		loadTask = null;
+		configTask = null;
+		
+		inProgress = false;
+	}
+	
+	//===================================CONTROLS==================================
+	
+	private static final boolean start_or_resume(String[] args, String name)
 	{
 		boolean isNew;
 		if (isNew = ConfigProcess.isNew(name))
@@ -40,36 +54,30 @@ public class TaskManager {
 		schedule();
 		return isNew;
 	}
-	private static final void stop_or_finish()
+	static final void resume(String name)
 	{
-		loadTask.cancel();
-		configTask.cancel();
-		
-		loadProcess = null;
-		configProcess = null;
-		loadTask = null;
-		configTask = null;
-		
-		inProgress = false;
+		loadProcess = new LoadProcess(name);
+		configProcess = new ConfigProcess(name);
+		schedule();
+	}
+	private static final boolean stop_or_finish()
+	{
+		boolean isFin;
+		if (isFin = loadProcess.n == loadProcess.totalRegions)
+		{
+			configProcess.finish();
+		}
+		else
+		{
+			configProcess.stop();
+		}
+		closedown();
+		return isFin;
 	}
 	static final void finish()
 	{
 		configProcess.finish();
-		stop_or_finish();
-	}
-	private static final boolean stop()
-	{
-		if (inProgress)
-		{
-			if (loadProcess.n == loadProcess.totalRegions) finish();
-			else
-			{
-				configProcess.stop();
-				stop_or_finish();
-			}
-			return true;
-		}
-		return false;
+		closedown();
 	}
 	
 	//===================================COMMANDS===================================
@@ -78,12 +86,16 @@ public class TaskManager {
 	{
 		public final boolean onCommand(CommandSender sender, Command label, String command, String[] args) 
 		{
-			if (stop())
+			if (inProgress)
 			{
-				sender.sendMessage("stopped.");
+				sender.sendMessage
+				(
+						stop_or_finish() ?
+								"it just finished!" :
+									"stopping..."
+						);
 				return true;
 			}
-			sender.sendMessage("nothing to stop.");
 			return false;
 		}
 	}
@@ -93,13 +105,13 @@ public class TaskManager {
 		{
 			if (inProgress)
 			{
-				sender.sendMessage("a process is already running (" + configProcess.name + "). /StopLoadSave to stop.");
+				sender.sendMessage("already loading " + configProcess.name + ". /StopFullMapLoad to stop.");
 				return false;
 			}
 			inProgress = true;
 			sender.sendMessage
 			(
-					start(args,((Player)sender).getWorld().getName()) ?
+					start_or_resume(args,((Player)sender).getWorld().getName()) ?
 							"starting..." :
 								"resuming..."
 					);

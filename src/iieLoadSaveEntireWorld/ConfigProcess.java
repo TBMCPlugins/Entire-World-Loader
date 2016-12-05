@@ -58,10 +58,6 @@ public class ConfigProcess implements Runnable {
 	{
 		this.name = name;
 		config.set("@ CRASH RESUME", name);
-	}	
-	ConfigProcess(boolean b)
-	{
-		name = config.getString("@ CRASH RESUME");
 	}
 	public final void run()
 	{		
@@ -82,13 +78,6 @@ public class ConfigProcess implements Runnable {
 				+ "]"
 				);
 	}
-	final void finish()
-	{
-		config.set("@ FINISHED WORLDS", name);
-		config.set("@ CRASH RESUME", null);
-		config.set(name, null);
-		plugin.saveConfig();
-	}
 	final void stop()
 	{
 		run();
@@ -96,5 +85,14 @@ public class ConfigProcess implements Runnable {
 		plugin.saveConfig();
 		Bukkit.getLogger()
 				.info("...stopping world-load");
+	}
+	final void finish()
+	{
+		config.set("@ FINISHED WORLDS", name);
+		config.set("@ CRASH RESUME", null);
+		config.set(name, null);
+		plugin.saveConfig();
+		Bukkit.getLogger()
+				.info("...finished!");
 	}
 }

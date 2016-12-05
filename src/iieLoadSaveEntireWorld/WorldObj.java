@@ -2,6 +2,9 @@ package iieLoadSaveEntireWorld;
 
 public class WorldObj {
 	
+	private static final int dWidth = 44; //default
+	private static final int dTotal = dWidth * dWidth;
+	
 	final int total;
 	int[] current;
 	int n;
@@ -12,7 +15,7 @@ public class WorldObj {
 	
 	WorldObj()
 	{
-		total 		= 1936;//(44*44)
+		total 		= dTotal;
 		current		= new int[] { -1,	-1	};
 	}
 	WorldObj(int total, int[] center)
@@ -64,8 +67,8 @@ public class WorldObj {
 	//==============================================================================
 	private static final class ParsedArgs
 	{
-		private static final int defaultRadius = 11264;
-		private static final int[] defaultCenter = new int[]{0,0};
+		private static final int dRadius = dWidth/2 * 512 - 512;
+		private static final int[] dCenter = new int[]{0,0};
 		
 		final int radius;
 		final int[] center;
@@ -77,7 +80,7 @@ public class WorldObj {
 			}
 			else 
 			{
-				radius = defaultRadius;
+				radius = dRadius;
 			}
 			if (args.length > 2 && isInt(args[1]) && isInt(args[2]))
 			{
@@ -86,7 +89,7 @@ public class WorldObj {
 			}
 			else 
 			{
-				center = defaultCenter;
+				center = dCenter;
 			}
 		}
 		private static final boolean isInt(String arg)
@@ -117,7 +120,11 @@ public class WorldObj {
 						Math.floorDiv( a.center[1] - a.radius, 512 ),
 						Math.floorDiv( a.center[1] + a.radius, 512 )
 						};
-		//add margins---------------------------------------------------------------
+		
+		//--------------------------------------------------------------------------
+		//ADD MARGINS:
+		//--------------------------------------------------------------------------
+		
 		final int[] edges = new int[4];
 		final int[] radii = new int[4];
 		final boolean[] margin = new boolean[4];

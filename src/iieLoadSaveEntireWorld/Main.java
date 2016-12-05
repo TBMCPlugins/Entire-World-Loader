@@ -24,7 +24,7 @@ public class Main extends JavaPlugin {
 		public final void run()
 		{
 			Bukkit.getLogger().info("...resuming from crash");
-			TaskManager.start(null, ConfigProcess.getCrashResume());
+			TaskManager.resume(ConfigProcess.getCrashResume());
 		}
 	}
 }
