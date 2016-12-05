@@ -1,5 +1,8 @@
 package iieLoadSaveEntireWorld;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -11,6 +14,7 @@ public class LoadProcess implements Runnable
 	final int totalRegions;
 	int[] currentRegion;
 	
+	//NEW PROCESS
 	LoadProcess(String name, WorldObj newWorld)
 	{
 		ConfigProcess.addNew(name, newWorld);
@@ -19,7 +23,7 @@ public class LoadProcess implements Runnable
 		totalRegions	= newWorld.total;
 		currentRegion 	= newWorld.current;
 	}
-	
+	//RESUME
 	LoadProcess(String name)
 	{
 		final WorldObj unfinished = ConfigProcess.getUnfinished(name);
@@ -108,8 +112,8 @@ public class LoadProcess implements Runnable
 	
 	//==================================RUN=================================
 	
-	private static volatile boolean ready = true;
-	private 	   volatile int unqueued = 0;
+	private volatile boolean ready = true;
+	private volatile int unqueued = 0;
 	public final void run() 
 	{
 		if (!ready) return;
@@ -128,6 +132,52 @@ public class LoadProcess implements Runnable
 		{
 			TaskManager.finish();
 		}
+		while (skip(currentRegion))
+		{
+			if (!setNextRegion())
+			{
+				TaskManager.finish();
+			}
+		}
 		ready = true;
-	}	
+	}
+	
+	//=============================SKIP REGION?=============================
+	//this is specific to our new TerrainControl world
+	//skip all regions that contain jungle biome
+	private static final boolean skip(int[] r)
+	{
+		switch(r[0])
+		{
+			case -17 : return check(r[1],						-15,-14	);
+			case -16 : return check(r[1],	-20,-19,-18,-17,-16,-15,-14	);
+			case -15 : return check(r[1],	-20,-19,-18,-17,-16,-15		);
+			case -14 : return check(r[1],		-19,-18,-17,-16,-15		);
+			case -13 : return check(r[1],		-19,-18,-17,-16,-15		);
+			case -12 : return check(r[1],			-18,-17,-16,-15		);
+			case -11 : return check(r[1],		-19,-18,-17,-16,-15,-14	);
+			case -10 : return check(r[1],		-19,-18,-17,-16,-15,-14	);
+			case -9  : return check(r[1],		-19,-18,-17,-16,-15,-14	);
+			case -8  : return check(r[1],			-18,-17,-16,-15		);
+			case -7  : return check(r[1],			-18,-17,-16,-15		);
+			case -6  : return check(r[1],				-17,-16,-15		);
+			
+			case -3 : return check(r[1],			-7, -6, -5		);
+			case -2 : return check(r[1],				-6, -5, -4	);
+			case -1 : return check(r[1],			-7, -6, -5, -4	);
+			case  0 : return check(r[1],		-8, -7, -6, -5, -4	);
+			case  1 : return check(r[1],	-9, -8, -7, -6, -5, -4	);
+			case  2 : return check(r[1],	-9, -8, -7, -6, -5		);
+			case  3 : return check(r[1],			-7, -6			);
+		}
+		return false;
+	}
+	private static final boolean check(int z, int... skips)
+	{
+		for (int skip : skips)
+		{
+			if (z == skip) return true;
+		}
+		return false;
+	}
 }

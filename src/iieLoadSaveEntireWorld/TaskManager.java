@@ -11,44 +11,34 @@ public class TaskManager {
 		
 	private static boolean inProgress = false;
 	
-			static LoadProcess loadProcess;
-	private static ConfigProcess configProcess;
+	static LoadProcess loadProcess;
+	static ConfigProcess configProcess;
 	private static BukkitTask loadTask;
 	private static BukkitTask configTask;
 	
 	
 	//===================================CONTROLS==================================
 	
-	private static final void schedule(long delay)
+	private static final void schedule()
 	{
-		loadTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, delay, 100);
-		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, delay, 200);
+		loadTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, 0, 200);
+		configTask = Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, 0, 400);
 	}
 	//-----------------------------------------------------------------------------
-	private static final boolean start(String[] args, String name)
+	static final boolean start(String[] args, String name)
 	{
-		if (ConfigProcess.isNew(name))
+		boolean isNew;
+		if (isNew = ConfigProcess.isNew(name))
 		{
 			loadProcess = new LoadProcess(name, WorldObj.generate(args));
-			configProcess = new ConfigProcess(name);
-			schedule(0);
-			return true;
 		}
-		loadProcess = new LoadProcess(name);
-		configProcess = new ConfigProcess(name);
-		schedule(0);
-		return false;
-	}
-	static final boolean crashResume()
-	{
-		if (ConfigProcess.crashResume())
+		else
 		{
-			loadProcess = new LoadProcess(ConfigProcess.getCrashResume());
-			configProcess = new ConfigProcess(false);
-			schedule(1200);
-			return true;
+			loadProcess = new LoadProcess(name);
 		}
-		return false;
+		configProcess = new ConfigProcess(name);
+		schedule();
+		return isNew;
 	}
 	private static final void stop_or_finish()
 	{

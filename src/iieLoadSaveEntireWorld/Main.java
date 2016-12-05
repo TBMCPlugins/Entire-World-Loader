@@ -14,7 +14,17 @@ public class Main extends JavaPlugin {
 		ConfigProcess.plugin = this;
 		ConfigProcess.config = getConfig();
 		
-		if (TaskManager.crashResume()) 
+		if (ConfigProcess.crashResume())
+		{
+			Bukkit.getScheduler().runTaskLater(this, new CrashResume(), 1200);
+		}
+	}
+	private static final class CrashResume implements Runnable
+	{
+		public final void run()
+		{
 			Bukkit.getLogger().info("...resuming from crash");
+			TaskManager.start(null, ConfigProcess.getCrashResume());
+		}
 	}
 }
