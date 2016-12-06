@@ -21,8 +21,8 @@ public class TaskManager {
 	
 	private static final void schedule()
 	{
-		loadTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, 0, 200);
-		configTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, 100, 200);
+		loadTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, loadProcess, 0, 300);
+		configTask 	= Bukkit.getScheduler().runTaskTimer(ConfigProcess.plugin, configProcess, 150, 300);
 	}
 	private static final void closedown()
 	{

@@ -128,19 +128,21 @@ public class LoadProcess implements Runnable
 		{
 			TaskManager.finish();
 		}
-		while (skip(currentRegion))
-		{
-			if (!setNextRegion())
-			{
-				TaskManager.finish();
-			}
-		}
+		//while (skip(currentRegion))
+		//{
+		//	if (!setNextRegion())
+		//	{
+		//		TaskManager.finish();
+		//	}
+		//}
 		ready = true;
 	}
 	
 	//=============================SKIP REGION?=============================
 	//this is specific to our new TerrainControl world
 	//skip all regions that contain jungle biome
+	
+	/*
 	private static final boolean skip(int[] r)
 	{
 		switch(r[0])
@@ -176,4 +178,5 @@ public class LoadProcess implements Runnable
 		}
 		return false;
 	}
+	*/
 }
