@@ -11,7 +11,6 @@ public class LoadProcess implements Runnable
 	final int totalRegions;
 	int[] currentRegion;
 	
-	//NEW PROCESS
 	LoadProcess(String name, WorldObj newWorld)
 	{
 		ConfigProcess.addNew(name, newWorld);
@@ -19,11 +18,16 @@ public class LoadProcess implements Runnable
 		world 			= Bukkit.getWorld(name);
 		totalRegions	= newWorld.total;
 		currentRegion 	= newWorld.current;
+		
+		n = 1;
+		c = 1;
+		D = 1;
+		d = 0;
+		B = false;
 	}
-	//RESUME
 	LoadProcess(String name)
 	{
-		final WorldObj unfinished = ConfigProcess.getUnfinished(name);
+		WorldObj unfinished = ConfigProcess.getUnfinished(name);
 		
 		world 			= Bukkit.getWorld(name);
 		totalRegions	= unfinished.total;
@@ -57,11 +61,11 @@ public class LoadProcess implements Runnable
 	 * 	etc.
 	 */
 	
-	int n = 1;				//how many regions have been saved already
-	int c = 1;				//direction of travel: E,N,W,S - 1,2,3,4
-	int D = 1;				//distance to travel
-	int d = 0;				//distance already traveled
-	boolean B = false;		//OK to increase distance?
+	int n;			//how many regions have been saved already
+	int c;			//direction of travel: E,N,W,S - 1,2,3,4
+	int D;			//distance to travel
+	int d;			//distance already traveled
+	boolean B;		//OK to increase distance?
 	
 	private final boolean setNextRegion() 
 	{
