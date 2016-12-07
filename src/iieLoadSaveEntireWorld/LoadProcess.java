@@ -23,10 +23,15 @@ public class LoadProcess implements Runnable
 	
 	LoadProcess(String name) 						//resume from stored
 	{
-		Bukkit.getLogger().info("resuming stored world-load process");
-		
 		WorldObj unfinishedworld = ConfigProcess.getUnfinished(name);
-		
+		Bukkit.getLogger().info("resuming stored world-load process "
+				+ unfinishedworld.n + " "
+				+ unfinishedworld.c + " "
+				+ unfinishedworld.D + " "
+				+ unfinishedworld.d + " "
+				+ unfinishedworld.B
+				);
+				
 		world 			= Bukkit.getWorld(name);
 		totalRegions	= unfinishedworld.total;
 		currentRegion 	= unfinishedworld.current;

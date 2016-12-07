@@ -15,6 +15,7 @@ public class ConfigProcess implements Runnable {
 	}
 	static final void addNew(String name, WorldObj newWorld)
 	{
+		Bukkit.getLogger().info("config: addNew(" + name + ")");
 		config.set(name + ".total", newWorld.total);
 		config.set(name + ".currentRegion.x", newWorld.current[0]);
 		config.set(name + ".currentRegion.z", newWorld.current[1]);
@@ -22,7 +23,7 @@ public class ConfigProcess implements Runnable {
 		config.set(name + ".c", 1);
 		config.set(name + ".D", 1);
 		config.set(name + ".d", 0);
-		config.set(name + ".B", 0);
+		config.set(name + ".B", false);
 		plugin.saveConfig();
 	}
 	static final WorldObj getUnfinished(String name)
@@ -39,7 +40,7 @@ public class ConfigProcess implements Runnable {
 						config.getInt(name + ".c"),
 						config.getInt(name + ".D"),
 						config.getInt(name + ".d"),
-						config.getInt(name + ".B") == 1
+						config.getBoolean(name + ".B")
 						);		
 	}
 	static final boolean crashResume()
@@ -67,7 +68,7 @@ public class ConfigProcess implements Runnable {
 		config.set(name + ".c", TaskManager.loadProcess.c);
 		config.set(name + ".D", TaskManager.loadProcess.D);
 		config.set(name + ".d", TaskManager.loadProcess.d);
-		config.set(name + ".B", TaskManager.loadProcess.B ? 1 : 0);
+		config.set(name + ".B", TaskManager.loadProcess.B);
 		plugin.saveConfig();
 		Bukkit.getLogger().info
 		(
