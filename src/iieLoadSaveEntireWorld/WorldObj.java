@@ -9,7 +9,7 @@ public class WorldObj {
 	int[] current;
 	int n;
 	int c;
-	int D;
+	int s;
 	int d;
 	boolean B;
 	
@@ -24,20 +24,23 @@ public class WorldObj {
 		this.current	= center;
 	}
 	WorldObj(int total, int[] current, 
-			int n, int c, int D, int d, boolean B)
+			int n, int c, int s, int d, boolean B)
 	{
 		this.total 		= total;
 		this.current	= current;
 		this.n = n;
 		this.c = c;
-		this.D = D;
-		this.D = d;
+		this.s = s;
+		this.d = d;
 		this.B = B;
 	}
 		
 	static final WorldObj generate(String[] args)
 	{
-		if (args.length == 0) return new WorldObj();
+		if (args.length == 0)
+		{
+			return new WorldObj();
+		}
 		
 		int[] bounds = regionBounds(new ParsedArgs(args));
 		

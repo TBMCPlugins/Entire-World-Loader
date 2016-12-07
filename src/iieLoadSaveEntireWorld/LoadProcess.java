@@ -14,7 +14,7 @@ public class LoadProcess implements Runnable
 	//see setNextRegion()
 	int n;			
 	int c;			
-	int D;			
+	int s;			
 	int d;			
 	boolean B;		
 	
@@ -23,14 +23,9 @@ public class LoadProcess implements Runnable
 	
 	LoadProcess(String name) 						//resume from stored
 	{
+		Bukkit.getLogger().info("resuming stored world-load process");
+		
 		WorldObj unfinishedworld = ConfigProcess.getUnfinished(name);
-		Bukkit.getLogger().info("resuming stored world-load process "
-				+ unfinishedworld.n + " "
-				+ unfinishedworld.c + " "
-				+ unfinishedworld.D + " "
-				+ unfinishedworld.d + " "
-				+ unfinishedworld.B
-				);
 				
 		world 			= Bukkit.getWorld(name);
 		totalRegions	= unfinishedworld.total;
@@ -38,7 +33,7 @@ public class LoadProcess implements Runnable
 		
 		n = unfinishedworld.n;
 		c = unfinishedworld.c;
-		D = unfinishedworld.D;
+		s = unfinishedworld.s;
 		d = unfinishedworld.d;
 		B = unfinishedworld.B;
 	}
@@ -54,7 +49,7 @@ public class LoadProcess implements Runnable
 		
 		n = 1;
 		c = 1;
-		D = 1;
+		s = 1;
 		d = 0;
 		B = false;
 	}
@@ -102,18 +97,18 @@ public class LoadProcess implements Runnable
 	 * 
 	 * 	n		how many regions have been saved already
 	 * 	c		direction of travel: E,N,W,S - 1,2,3,4
-	 * 	D		distance to travel (side-length)
-	 * 	d		distance already traveled
+	 * 	s		side: distance to travel (side-length)
+	 * 	d		side: distance already traveled
 	 * 	B		OK to increase distance?
 	 */
 	
 	private final boolean setNextRegion() 
 	{
 		if (n == totalRegions) return false;
-		if (d == D)
+		if (d == s)
 		{
 			d = 1;		
-			if (B) D++;		
+			if (B) s++;		
 			B = !B;
 			c = c == 4 ? 1 : c + 1;
 		}
