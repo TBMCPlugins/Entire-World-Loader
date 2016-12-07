@@ -5,19 +5,47 @@ import org.bukkit.World;
 
 public class LoadProcess implements Runnable 
 {
-	//=================================INIT=================================
+	//================================VALUES================================
 	
 	private final World world;
 	final int totalRegions;
 	int[] currentRegion;
 	
-	LoadProcess(String name, WorldObj newWorld)
+	//see setNextRegion()
+	int n;			
+	int c;			
+	int D;			
+	int d;			
+	boolean B;		
+	
+	
+	//=============================CONSTRUCTORS=============================
+	
+	LoadProcess(String name) 						//resume from stored
 	{
-		ConfigProcess.addNew(name, newWorld);
+		Bukkit.getLogger().info("resuming stored world-load process");
+		
+		WorldObj unfinishedworld = ConfigProcess.getUnfinished(name);
 		
 		world 			= Bukkit.getWorld(name);
-		totalRegions	= newWorld.total;
-		currentRegion 	= newWorld.current;
+		totalRegions	= unfinishedworld.total;
+		currentRegion 	= unfinishedworld.current;
+		
+		n = unfinishedworld.n;
+		c = unfinishedworld.c;
+		D = unfinishedworld.D;
+		d = unfinishedworld.d;
+		B = unfinishedworld.B;
+	}
+	LoadProcess(String name, WorldObj newworld)		//new process
+	{
+		Bukkit.getLogger().info("new world-load process");
+		
+		ConfigProcess.addNew(name, newworld);
+		
+		world 			= Bukkit.getWorld(name);
+		totalRegions	= newworld.total;
+		currentRegion 	= newworld.current;
 		
 		n = 1;
 		c = 1;
@@ -25,23 +53,30 @@ public class LoadProcess implements Runnable
 		d = 0;
 		B = false;
 	}
-	LoadProcess(String name)
+	
+	
+	//==============================GET CHUNKS==============================
+	
+	private final int[][][] getChunksCurrentRegion()
 	{
-		WorldObj unfinished = ConfigProcess.getUnfinished(name);
-		
-		world 			= Bukkit.getWorld(name);
-		totalRegions	= unfinished.total;
-		currentRegion 	= unfinished.current;
-		
-		n = unfinished.n;
-		c = unfinished.c;
-		D = unfinished.D;
-		d = unfinished.d;
-		B = unfinished.B;
+		final int[][][] chunks = new int[32][32][2];
+		int xR = currentRegion[0] * 32;
+		int zR = currentRegion[1] * 32;
+		int z;
+		for (int x = 0; x < 32; x++)
+		{
+			z = 0;
+			for (; z < 32; z++)
+			{
+				chunks[x][z][0] = xR + x;
+				chunks[x][z][1] = zR + z;	
+			}
+		}
+		return chunks;
 	}
 
 	
-	//===============================PATTERN================================
+	//===========================SET NEXT REGION============================
 	
 	/*	The pattern:
 	 * 
@@ -59,13 +94,13 @@ public class LoadProcess implements Runnable
 	 * 		  +-----------------------
 	 * 			-2  -1   X   1   2   3
 	 * 	etc.
+	 * 
+	 * 	n		how many regions have been saved already
+	 * 	c		direction of travel: E,N,W,S - 1,2,3,4
+	 * 	D		distance to travel (side-length)
+	 * 	d		distance already traveled
+	 * 	B		OK to increase distance?
 	 */
-	
-	int n;			//how many regions have been saved already
-	int c;			//direction of travel: E,N,W,S - 1,2,3,4
-	int D;			//distance to travel
-	int d;			//distance already traveled
-	boolean B;		//OK to increase distance?
 	
 	private final boolean setNextRegion() 
 	{
@@ -90,27 +125,6 @@ public class LoadProcess implements Runnable
 	}
 	
 	
-	//==============================GET CHUNKS==============================
-	
-	private final int[][][] getChunksCurrentRegion()
-	{
-		final int[][][] chunks = new int[32][32][2];
-		int xR = currentRegion[0] * 32;
-		int zR = currentRegion[1] * 32;
-		int z;
-		for (int x = 0; x < 32; x++)
-		{
-			z = 0;
-			for (; z < 32; z++)
-			{
-				chunks[x][z][0] = xR + x;
-				chunks[x][z][1] = zR + z;	
-			}
-		}
-		return chunks;
-	}
-	
-	
 	//==================================RUN=================================
 	
 	private volatile boolean ready = true;
@@ -132,55 +146,6 @@ public class LoadProcess implements Runnable
 		{
 			TaskManager.finish();
 		}
-		//while (skip(currentRegion))
-		//{
-		//	if (!setNextRegion())
-		//	{
-		//		TaskManager.finish();
-		//	}
-		//}
 		ready = true;
 	}
-	
-	//=============================SKIP REGION?=============================
-	//this is specific to our new TerrainControl world
-	//skip all regions that contain jungle biome
-	
-	/*
-	private static final boolean skip(int[] r)
-	{
-		switch(r[0])
-		{
-			case -17 : return check(r[1],						-15,-14	);
-			case -16 : return check(r[1],	-20,-19,-18,-17,-16,-15,-14	);
-			case -15 : return check(r[1],	-20,-19,-18,-17,-16,-15		);
-			case -14 : return check(r[1],		-19,-18,-17,-16,-15		);
-			case -13 : return check(r[1],		-19,-18,-17,-16,-15		);
-			case -12 : return check(r[1],			-18,-17,-16,-15		);
-			case -11 : return check(r[1],		-19,-18,-17,-16,-15,-14	);
-			case -10 : return check(r[1],		-19,-18,-17,-16,-15,-14	);
-			case -9  : return check(r[1],		-19,-18,-17,-16,-15,-14	);
-			case -8  : return check(r[1],			-18,-17,-16,-15		);
-			case -7  : return check(r[1],			-18,-17,-16,-15		);
-			case -6  : return check(r[1],				-17,-16,-15		);
-			
-			case -3 : return check(r[1],			-7, -6, -5		);
-			case -2 : return check(r[1],				-6, -5, -4	);
-			case -1 : return check(r[1],			-7, -6, -5, -4	);
-			case  0 : return check(r[1],		-8, -7, -6, -5, -4	);
-			case  1 : return check(r[1],	-9, -8, -7, -6, -5, -4	);
-			case  2 : return check(r[1],	-9, -8, -7, -6, -5		);
-			case  3 : return check(r[1],			-7, -6			);
-		}
-		return false;
-	}
-	private static final boolean check(int z, int... skips)
-	{
-		for (int skip : skips)
-		{
-			if (z == skip) return true;
-		}
-		return false;
-	}
-	*/
 }
